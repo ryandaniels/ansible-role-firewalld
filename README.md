@@ -79,7 +79,12 @@ rhel_firewalld_custom_service:
       - port/protocol (Required, unless a built-in service)
 ```
 
-See example below.
+See example for more details.  
+Get list of build-in services:  
+
+```bash
+firewall-offline-cmd --get-services
+```
 
 ## Example config file (inventories/dev-env/group_vars/all.yml)
 
@@ -180,7 +185,7 @@ ansible-playbook firewalld.yml --extra-vars "inventory=centos7 rhel_firewalld_st
 * [x] Get working with firewalld started or stopped
 * [ ] Confirm this everywhere needed:   notify: Reload firewalld
 * [ ] Add more tags to tasks
-* [x] Test this works if firewalld service is running
+* [x] Test this actually works if firewalld service is running and doesn't block traffic to running app
 * [ ] Build travis tests for many scenarios
 * [ ] Improve/shorten changing/removing a port
 * [ ] --diff doesn't show much since using many commands. Show what's going to happen and add pause when is debug enabled?
@@ -192,10 +197,10 @@ More commands can be found in firewalld documentation: <https://firewalld.org/do
 Add IPs to a Zone:
 
 ```bash
-firewall-cmd --zone=public --list-all
+firewall-offline-cmd --zone=public --list-all
 
-firewall-cmd --permanent --zone=internal --add-source=192.168.22.64/26
-firewall-cmd --permanent --zone=internal --add-source=192.168.23.64/26
+firewall-offline-cmd --zone=internal --add-source=192.168.22.64/26
+firewall-offline-cmd --zone=internal --add-source=192.168.23.64/26
 ```
 
 Add custom service to public zone:  
@@ -233,14 +238,14 @@ Misc useful commands:
 firewall-cmd --state
 firewall-cmd --get-active-zones
 
-firewall-cmd --zone=public --list-all
-firewall-cmd --zone=internal --list-all
+firewall-offline-cmd --zone=public --list-all
+firewall-offline-cmd --zone=internal --list-all
 
-firewall-cmd --zone=public --list-services
-firewall-cmd --zone=internal --list-services
+firewall-offline-cmd --zone=public --list-services
+firewall-offline-cmd --zone=internal --list-services
 
-firewall-cmd --info-service=app123-public
-firewall-cmd --info-service=app123-internal
+firewall-offline-cmd --info-service=app123-public
+firewall-offline-cmd --info-service=app123-internal
 
 firewall-cmd --reload
 ```
