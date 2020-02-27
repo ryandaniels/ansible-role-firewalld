@@ -1,4 +1,6 @@
-# ansible-role-routes_management
+# ansible-role-firewalld
+
+WIP: Use Caution! All the basics should work as described below.
 
 Add local firewall rules on server via firewalld.  
 Why another Ansible role to manage firewalld? The role does everything in "offline" mode. Even creating a new service works offline.  
@@ -12,6 +14,8 @@ Ports: To remove a port, delete it from the config (under port_protocol).
 Since VMs could have different interfaces (eth0/eth1 etc.), interfaces aren't managed.
 
 Be careful, this will remove and add firewalld rules on the OS. Use with caution.  
+
+firewalld manual: <https://firewalld.org/documentation/>
 
 ## Distros tested
 
@@ -36,6 +40,46 @@ debug_enabled_default: false
 ```yaml
 proxy_env: []
 ```
+
+* Remove unwanted default services from internal zone
+
+```yaml
+rhel_firewalld_internal_remove_default:
+  - mdns
+  - samba-client
+```
+
+* Install firewalld package
+
+```yaml
+rhel_firewalld_managed_pkg: true
+```
+
+* Zone Config
+
+Full list of firewalld predefined zones: <https://firewalld.org/documentation/zone/predefined-zones.html>
+
+```yaml
+rhel_firewalld_zone_source:
+  - zone: name of predefined zone (ex. internal|public) (Required)
+    state: enabled|disabled (Required)
+    source:
+      - "IP/Subnet" (Required)
+```
+
+* Service and Port Config
+
+```yaml
+rhel_firewalld_custom_service:
+  - name: service name (Required)
+    zone: public|internal etc (See zone list above) (Required)
+    state: enabled (Required)
+    description: Description of service (Optional)
+    port_protocol: (Required, unless a built-in service)
+      - port/protocol (Required, unless a built-in service)
+```
+
+See example below.
 
 ## Example config file (inventories/dev-env/group_vars/all.yml)
 
@@ -94,18 +138,17 @@ rhel_firewalld_custom_service:
     state: enabled
 ```
 
-## Example Playbook routes_management.yml
+## Example Playbook firewalld.yml
 
 ```yaml
 ---
 - hosts: '{{ inventory }}'
   become: yes
   vars:
-    # Use this role firewalld
+    # Use this role
     rhel_firewalld_managed: true
   roles:
   - firewalld
-
 ```
 
 ## Usage
@@ -132,11 +175,72 @@ Start firewalld service at end of role
 ansible-playbook firewalld.yml --extra-vars "inventory=centos7 rhel_firewalld_start=true" -i hosts-dev
 ```
 
-### TODO
+## TODO
 
 * [x] Get working with firewalld started or stopped
 * [ ] Confirm this everywhere needed:   notify: Reload firewalld
-* [ ] Test this works if firewalld service is running
+* [ ] Add more tags to tasks
+* [x] Test this works if firewalld service is running
 * [ ] Build travis tests for many scenarios
 * [ ] Improve/shorten changing/removing a port
 * [ ] --diff doesn't show much since using many commands. Show what's going to happen and add pause when is debug enabled?
+
+## firewalld Command Reference
+
+More commands can be found in firewalld documentation: <https://firewalld.org/documentation/man-pages/firewall-offline-cmd>
+
+Add IPs to a Zone:
+
+```bash
+firewall-cmd --zone=public --list-all
+
+firewall-cmd --permanent --zone=internal --add-source=192.168.22.64/26
+firewall-cmd --permanent --zone=internal --add-source=192.168.23.64/26
+```
+
+Add custom service to public zone:  
+
+```bash
+firewall-offline-cmd --new-service=app123-public
+firewall-offline-cmd --service=app123-public --set-short=app123-public
+firewall-offline-cmd --service=app123-public --set-description='app123 fw rules for public zone'
+firewall-offline-cmd --service=app123-public --add-port=5000/tcp
+firewall-offline-cmd --zone=public --add-service=app123-public
+```
+
+Add custom service to internal zone:  
+
+```bash
+firewall-offline-cmd --new-service=app123-internal
+firewall-offline-cmd --service=app123-internal --set-short=app123-internal
+firewall-offline-cmd --service=app123-internal --set-description='app123 fw rules for internal zone'
+firewall-offline-cmd --service=app123-internal --add-port=8080/tcp
+firewall-offline-cmd --service=app123-internal --add-port=9000/tcp
+firewall-offline-cmd --zone=internal --add-service=app123-internal
+
+firewall-offline-cmd --zone=internal --list-all
+```
+
+Get list of build-in services:  
+
+```bash
+firewall-offline-cmd --get-services
+```
+
+Misc useful commands:
+
+```bash
+firewall-cmd --state
+firewall-cmd --get-active-zones
+
+firewall-cmd --zone=public --list-all
+firewall-cmd --zone=internal --list-all
+
+firewall-cmd --zone=public --list-services
+firewall-cmd --zone=internal --list-services
+
+firewall-cmd --info-service=app123-public
+firewall-cmd --info-service=app123-internal
+
+firewall-cmd --reload
+```

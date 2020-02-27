@@ -85,36 +85,6 @@
   tags:
     - rhel_firewalld
 
-#Wrong to set fact, not needed.
-# - name: firewalld | set fact service exists
-#   set_fact:
-#     rhel_firewalld_hint_service_name_result: true
-#   with_items: "{{ rhel_firewalld_custom_service }}"
-#   when:
-#     - rhel_firewalld_managed|bool
-#     - '" " ~ item.name ~ " " not in stat_service_firewalld_services.stdout'
-#   loop_control:
-#     label: "Service not in firewalld service list: {{ item.name }}"
-#   tags:
-#     - rhel_firewalld
-
-#Command ref:
-#public zone
-# firewall-offline-cmd --new-service=custom1-public
-# firewall-offline-cmd --service=custom1-public --set-short=custom1-public
-# firewall-offline-cmd --service=custom1-public --set-description='custom1 fw rules for public zone'
-# firewall-offline-cmd --service=custom1-public --add-port=9092/tcp
-# firewall-offline-cmd --zone=public --add-service=custom1-public
-
-#internal zone
-# firewall-offline-cmd --new-service=custom1-internal
-# firewall-offline-cmd --service=custom1-internal --set-short=custom1-internal
-# firewall-offline-cmd --service=custom1-internal --set-description='custom1 fw rules for internal zone'
-# firewall-offline-cmd --service=custom1-internal --add-port=2181/tcp
-# firewall-offline-cmd --service=custom1-internal --add-port=2888/tcp
-# firewall-offline-cmd --service=custom1-internal --add-port=3888/tcp
-# firewall-offline-cmd --zone=internal --add-service=custom1
-
 #Built-in services will fail to be removed fully. But they are removed from the zone below (Add/Remove service in zone)
 #Use this instead? firewall-offline-cmd --zone=public --remove-service-from-zone=zabbix-agent
 #But then custom services aren't fully deleted..
@@ -136,8 +106,7 @@
     - rhel_firewalld
     - rhel_firewalld_remove_service
 
-#DONE: delete service
-#DONE: create custom service! Blocks can't use loops..
+#If only block can use loops..
 # - block:
 - name: firewalld | Create custom service name
   command: "firewall-offline-cmd --new-service={{ item.name }}"
@@ -250,8 +219,7 @@
 
 #DONE: how to 'change' a port that's defined?? Can only 'disable' entire service.
 #      Can add new ports. But not remove existing.
-#Remove all ports first? But don't reload fw?
-#firewall-offline-cmd --service=ssh --get-ports
+#firewall-offline-cmd --service=zabbix-agent --get-ports
 #Remove ports in output of above command that aren't in variable provided. 
 #Can't because built-in services I don't have ports for! Means all ports need to be defined!
 #DONE: add strict mode so this can be disabled (by default?). Not needed. Just dont remove ports if port_protocol is undefined.
@@ -356,7 +324,7 @@
   tags:
     - rhel_firewalld
 
-#firewall-offline-cmd --service=custom1-internal --query-port=2181/tcp
+#firewall-offline-cmd --service=app123-internal --query-port=2181/tcp
 - name: firewalld | Get custom service ports to add
   command: "firewall-offline-cmd --service={{ item.0.name }} --query-port={{ item.1 }}"
   register: stat_rhel_firewalld_service_get_service_port_add
@@ -459,7 +427,7 @@
 #     - rhel_firewalld
 #     - rhel_firewalld_create_service
 
-#Don't need to use set_fact to create new var? just use stat_rhel_firewalld_service_get_service_port_add.results with the magic of map etc
+#Don't need to use set_fact to create new var. just use stat_rhel_firewalld_service_get_service_port_add.results with the magic of map etc
 - name: firewalld | Add port for custom service
   command: "firewall-offline-cmd --service={{ item.item|map(attribute='name')|list|select('defined')|list|join(', ') }} --add-port={{ item.item|last }}"
   notify: Reload firewalld
@@ -526,7 +494,7 @@
 
 #Reload firewall now (if running) so service is visible for next task
 #Don't reload if doing remove/re-add right away. not needed since service is visible
-#reload here causes outage if firewalld running and custom1 is in service! Don't reload yet if exists..
+#reload here causes outage if firewalld running and app123 is in service! Don't reload yet if exists..
 - name: firewalld | reload firewalld
   #command: firewall-cmd --reload
   systemd:
@@ -551,7 +519,7 @@
 
 #Not needed, use ansible firewalld module
 #Start - add service to zone
-#firewall-offline-cmd --zone=internal --query-service=custom1-internal
+#firewall-offline-cmd --zone=internal --query-service=app123-internal
 # - name: firewalld | Get service zone
 #   command: "firewall-offline-cmd --zone={{ item.zone }} --query-service={{ item.name }}"
 #   register: stat_rhel_firewalld_service_get_service_zone
@@ -599,7 +567,7 @@
 #     - rhel_firewalld_create_service
 
 - name: firewalld | Add/Remove service in zone
-  # command: 'firewall-offline-cmd --zone=internal --add-service=custom1-internal'
+  # command: 'firewall-offline-cmd --zone=internal --add-service=app123-internal'
   firewalld:
     service: "{{ item.name }}"
     zone: "{{ item.zone }}"
@@ -646,6 +614,7 @@
     - ansible_os_family == "RedHat"
     - ansible_distribution_major_version == '7'
     - rhel_firewalld_managed|bool
+    - rhel_firewalld_internal_remove_default is defined
   tags:
     - rhel_firewalld
     - rhel_firewalld_remove_default

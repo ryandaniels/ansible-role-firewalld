@@ -11,6 +11,7 @@ rhel_firewalld_managed_pkg: true
 rhel_firewalld_packages:
   - firewalld
 
+# rhel_firewalld_internal_remove_default: []
 rhel_firewalld_internal_remove_default:
   - mdns
   - samba-client
@@ -53,7 +54,6 @@ rhel_firewalld_custom_service:
       - 9000/tcp
   - name: zabbix-agent
     zone: public
-    # state: disabled
     state: enabled
     port_protocol:
       # - 10050/tcp
