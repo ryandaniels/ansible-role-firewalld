@@ -1,18 +1,18 @@
 ---
 - name: Ensure required packages are installed (yum)
   yum:
-    name: "{{ rhel_firewalld_packages|default([]) }}"
+    name: "{{ firewalld_packages|default([]) }}"
     update_cache: yes
     state: installed
   environment: "{{ proxy_env }}"
   when:
     - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
-    - rhel_firewalld_managed_pkg|bool
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    - firewalld_managed_pkg|bool
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_pkg_install
+    - firewalld
+    - firewalld_pkg_install
 
 - name: firewalld | check if running. rc 0 means it is
   command: systemctl status firewalld warn=false
@@ -22,21 +22,21 @@
   changed_when: false
   no_log: True
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
   tags:
-    - rhel_firewalld
+    - firewalld
 
 - name: debug stat_service_firewalld_status
   debug: var=stat_service_firewalld_status.stdout_lines
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - debug_enabled_default|bool
   tags:
-    - rhel_firewalld
+    - firewalld
 
 - name: firewalld | Config zone source IP
   firewalld:
@@ -47,16 +47,16 @@
     offline: yes
   notify: Reload firewalld
   with_subelements:
-    - "{{ rhel_firewalld_zone_source|default({}) }}"
+    - "{{ firewalld_zone_source|default({}) }}"
     - source
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
   # loop_control:
   #   label: "Zone: {{ item.0.zone }} Source: {{ item.1 }}"
   tags:
-    - rhel_firewalld
+    - firewalld
 
 #get active services
 #when item not in service list, firewalld reload is needed to see item in service list so can add to zone
@@ -68,22 +68,22 @@
   changed_when: false
   no_log: true
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
   tags:
-    - rhel_firewalld
+    - firewalld
 
 - name: debug stat_service_firewalld_services
   debug: var=stat_service_firewalld_services.stdout
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - debug_enabled_default|bool
     - stat_service_firewalld_status.rc == 0
   tags:
-    - rhel_firewalld
+    - firewalld
 
 #Built-in services will fail to be removed fully. But they are removed from the zone below (Add/Remove service in zone)
 #Use this instead? firewall-offline-cmd --zone=public --remove-service-from-zone=zabbix-agent
@@ -93,18 +93,18 @@
   ignore_errors: true
   notify: Reload firewalld
   with_items:
-    - "{{ rhel_firewalld_custom_service|default({}) }}"
+    - "{{ firewalld_custom_service|default({}) }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - item.state == 'disabled'
     - '" " ~ item.name ~ " " in stat_service_firewalld_services.stdout'
   loop_control:
     label: "Removed service name: {{ item.name }}"
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_remove_service
+    - firewalld
+    - firewalld_remove_service
 
 #If only block can use loops..
 # - block:
@@ -115,107 +115,107 @@
           # firewall-offline-cmd --service={{ item.name }} --add-port={{ item.port_protocol }} && \
           # firewall-offline-cmd --zone={{ item.zone }} --add-service={{ item.name }}"
   with_items:
-    - "{{ rhel_firewalld_custom_service|default({}) }}"
+    - "{{ firewalld_custom_service|default({}) }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
-    # - rhel_firewalld_hint_service_name_result|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    # - firewalld_hint_service_name_result|bool
     - item.state == 'enabled'
     - '" " ~ item.name ~ " " not in stat_service_firewalld_services.stdout'
   loop_control:
     label: "Created service name: {{ item.name }}"
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_create_service
+    - firewalld
+    - firewalld_create_service
 
 - name: firewalld | Get custom service set-short
   command: "firewall-offline-cmd --service={{ item.name }} --get-short"
-  register: stat_rhel_firewalld_service_get_short
+  register: stat_firewalld_service_get_short
   failed_when: false
   ignore_errors: true
   changed_when: false
   # no_log: true
-  with_items: "{{ rhel_firewalld_custom_service|default({}) }}"
+  with_items: "{{ firewalld_custom_service|default({}) }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     # - stat_service_firewalld_status.rc == 0
   loop_control:
-    label: "{{ item.name }} - found short name: {{ stat_rhel_firewalld_service_get_short.stdout|d() }}"
+    label: "{{ item.name }} - found short name: {{ stat_firewalld_service_get_short.stdout|d() }}"
   tags:
-    - rhel_firewalld
+    - firewalld
 
-# - name: debug stat_rhel_firewalld_service_get_short
-#   debug: var=stat_rhel_firewalld_service_get_short
-#   # with_items: "{{ stat_rhel_firewalld_service_get_short.results }}"
+# - name: debug stat_firewalld_service_get_short
+#   debug: var=stat_firewalld_service_get_short
+#   # with_items: "{{ stat_firewalld_service_get_short.results }}"
 #   when:
 #     - debug_enabled_default|bool
-#     - rhel_firewalld_managed|bool
+#     - firewalld_managed|bool
 #     # - stat_service_firewalld_status.rc == 0
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
 - name: firewalld | Set custom service set-short
   command: "firewall-offline-cmd --service={{ item.item.name }} --set-short={{ item.item.name }}"
   with_items:
-    # - "{{ rhel_firewalld_custom_service|default({}) }}"
-    - "{{ stat_rhel_firewalld_service_get_short.results }}"
+    # - "{{ firewalld_custom_service|default({}) }}"
+    - "{{ stat_firewalld_service_get_short.results }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - item.item.state == 'enabled'
     - 'item.stdout != item.item.name'
   loop_control:
     label: "{{ item.item.name }} - set short name: {{ item.item.name }}"
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_create_service
+    - firewalld
+    - firewalld_create_service
 
 - name: firewalld | Get custom service description
   command: "firewall-offline-cmd --service={{ item.name }} --get-description"
-  register: stat_rhel_firewalld_service_get_description
+  register: stat_firewalld_service_get_description
   failed_when: false
   ignore_errors: true
   changed_when: false
-  with_items: "{{ rhel_firewalld_custom_service|default({}) }}"
+  with_items: "{{ firewalld_custom_service|default({}) }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
   loop_control:
-    label: "{{ item.name }} - found description: {{ stat_rhel_firewalld_service_get_description.stdout|d() }}"
+    label: "{{ item.name }} - found description: {{ stat_firewalld_service_get_description.stdout|d() }}"
   tags:
-    - rhel_firewalld
+    - firewalld
 
-# - name: debug stat_rhel_firewalld_service_get_description
-#   debug: var=stat_rhel_firewalld_service_get_description
-#   # with_items: "{{ stat_rhel_firewalld_service_get_description.results }}"
+# - name: debug stat_firewalld_service_get_description
+#   debug: var=stat_firewalld_service_get_description
+#   # with_items: "{{ stat_firewalld_service_get_description.results }}"
 #   when:
 #     - debug_enabled_default|bool
-#     - rhel_firewalld_managed|bool
+#     - firewalld_managed|bool
 #     # - stat_service_firewalld_status.rc == 0
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
 - name: firewalld | Set custom service description
   command: "firewall-offline-cmd --service={{ item.item.name }} --set-description='{{ item.item.description }}'"
   with_items:
-    - "{{ stat_rhel_firewalld_service_get_description.results }}"
+    - "{{ stat_firewalld_service_get_description.results }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - item.item.state == 'enabled'
     - item.item.description is defined
     - item.stdout != item.item.description
   loop_control:
     label: "{{ item.item.name }} - set description: {{ item.item.description|default({}) }}"
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_create_service
+    - firewalld
+    - firewalld_create_service
 
 #DONE: how to 'change' a port that's defined?? Can only 'disable' entire service.
 #      Can add new ports. But not remove existing.
@@ -228,85 +228,85 @@
 #Remove if port is not defined in vars
 - name: firewalld | Get custom service ports in firewalld
   command: "firewall-offline-cmd --service={{ item.name }} --get-ports"
-  register: stat_rhel_firewalld_service_get_service_port_list
+  register: stat_firewalld_service_get_service_port_list
   failed_when: false
   # ignore_errors: true
   changed_when: false
   with_items:
-    - "{{ rhel_firewalld_custom_service|default({}) }}"
+    - "{{ firewalld_custom_service|default({}) }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     # - item.state == 'enabled'
   loop_control:
-    label: "{{ item.name }} - found ports: {{ stat_rhel_firewalld_service_get_service_port_list.stdout|d() }}"
+    label: "{{ item.name }} - found ports: {{ stat_firewalld_service_get_service_port_list.stdout|d() }}"
   tags:
-    - rhel_firewalld
+    - firewalld
 
-# - name: debug stat_rhel_firewalld_service_get_service_port_list
-#   debug: var=stat_rhel_firewalld_service_get_service_port_list
+# - name: debug stat_firewalld_service_get_service_port_list
+#   debug: var=stat_firewalld_service_get_service_port_list
 #   when:
 #     - debug_enabled_default|bool
-#     - rhel_firewalld_managed|bool
+#     - firewalld_managed|bool
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
-# - name: firewalld | debug stat_rhel_firewalld_service_get_service_port_list.results
+# - name: firewalld | debug stat_firewalld_service_get_service_port_list.results
 #   debug: msg="{{ item.item.name }}, {{ item.stdout }}" #, item.rc={{ item.rc }}, item.item_debug={{ item.item|type_debug }}"
-#   with_items: "{{ stat_rhel_firewalld_service_get_service_port_list.results }}"
+#   with_items: "{{ stat_firewalld_service_get_service_port_list.results }}"
 #   when:
 #     - ansible_os_family == "RedHat"
 #     - ansible_distribution_major_version == '7'
-#     - rhel_firewalld_managed|bool
+#     - firewalld_managed|bool
 #     - debug_enabled_default|bool
 #   loop_control:
 #     label: ""
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
-- name: firewalld | Set variable rhel_firewalld_service_port_list
+- name: firewalld | Set variable firewalld_service_port_list
   set_fact:
-    rhel_firewalld_service_port_list: "{{ rhel_firewalld_service_port_list|default([]) + [{'name': item.item.name , 'port_protocol': item.item.port_protocol , 'port_stdout': item.stdout.split(' ')} ] }}"
+    firewalld_service_port_list: "{{ firewalld_service_port_list|default([]) + [{'name': item.item.name , 'port_protocol': item.item.port_protocol , 'port_stdout': item.stdout.split(' ')} ] }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - item.item.port_protocol is defined #prevents removing ports of built-in firewalld services (if port_protocol is empty)
     # - item.rc != 0
-  loop: "{{ stat_rhel_firewalld_service_get_service_port_list.results|flatten(levels=1) }}"
+  loop: "{{ stat_firewalld_service_get_service_port_list.results|flatten(levels=1) }}"
   loop_control:
     label: ""
   tags:
-    - rhel_firewalld
+    - firewalld
 
-# - name: firewalld | show variable rhel_firewalld_service_port_list
-#   debug: var=rhel_firewalld_service_port_list
-#   when: debug_enabled_default|bool and rhel_firewalld_service_port_list is defined
+# - name: firewalld | show variable firewalld_service_port_list
+#   debug: var=firewalld_service_port_list
+#   when: debug_enabled_default|bool and firewalld_service_port_list is defined
 
-- name: firewalld | debug rhel_firewalld_service_port_list
+- name: firewalld | debug firewalld_service_port_list
   debug: msg="{{ item.name }}, {{ item.port_protocol }}, {{ item.port_stdout }}" #, item.rc={{ item.rc }}, item.item_debug={{ item.item|type_debug }}"
-  with_items: "{{ rhel_firewalld_service_port_list }}"
+  with_items: "{{ firewalld_service_port_list }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - debug_enabled_default|bool
   loop_control:
     label: ""
   tags:
-    - rhel_firewalld
+    - firewalld
 
 - name: firewalld | Remove custom service ports not specified
   command: "firewall-offline-cmd --service={{ item.0.name }} --remove-port='{{ item.1 }}'"
   notify: Reload firewalld
   with_subelements:
-    - "{{ rhel_firewalld_service_port_list }}"
+    - "{{ firewalld_service_port_list }}"
     - port_stdout
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     # - item.item.state == 'enabled'
     - item.1 is defined
     - item.1|length > 0
@@ -314,109 +314,109 @@
   loop_control:
     label: "{{ item.0.name }} - removed port: {{ item.1|default({}) }}"
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_create_service
+    - firewalld
+    - firewalld_create_service
 
 - name: pause
   pause:
     seconds: 30
-  when: debug_enabled_default|bool and rhel_firewalld_managed|bool
+  when: debug_enabled_default|bool and firewalld_managed|bool
   tags:
-    - rhel_firewalld
+    - firewalld
 
 #firewall-offline-cmd --service=app123-internal --query-port=2181/tcp
 - name: firewalld | Get custom service ports to add
   command: "firewall-offline-cmd --service={{ item.0.name }} --query-port={{ item.1 }}"
-  register: stat_rhel_firewalld_service_get_service_port_add
+  register: stat_firewalld_service_get_service_port_add
   failed_when: false
   # ignore_errors: true
   changed_when: false
   with_subelements:
-    - "{{ rhel_firewalld_custom_service|default({}) }}"
+    - "{{ firewalld_custom_service|default({}) }}"
     - port_protocol
     - skip_missing: True
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - item.0.state == 'enabled'
     - item is defined
     - item.1 is defined
   loop_control:
-    label: "{{ item.0.name }} - found: {{ 'True' if not stat_rhel_firewalld_service_get_service_port_add.rc|d(false)|bool else 'False' }}"
+    label: "{{ item.0.name }} - found: {{ 'True' if not stat_firewalld_service_get_service_port_add.rc|d(false)|bool else 'False' }}"
   tags:
-    - rhel_firewalld
+    - firewalld
 
-- name: firewalld | debug stat_rhel_firewalld_service_get_service_port_add
-  debug: var=stat_rhel_firewalld_service_get_service_port_add
+- name: firewalld | debug stat_firewalld_service_get_service_port_add
+  debug: var=stat_firewalld_service_get_service_port_add
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - debug_enabled_default|bool
   tags:
-    - rhel_firewalld
+    - firewalld
 
-- name: firewalld | debug stat_rhel_firewalld_service_get_service_port_add_add.results|last
+- name: firewalld | debug stat_firewalld_service_get_service_port_add_add.results|last
   debug: msg="{{ item.item | last }}" #, item.rc={{ item.rc }}, item.item_debug={{ item.item|type_debug }}"
-  with_items: "{{ stat_rhel_firewalld_service_get_service_port_add.results }}"
+  with_items: "{{ stat_firewalld_service_get_service_port_add.results }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - debug_enabled_default|bool
   loop_control:
     label: ""
   tags:
-    - rhel_firewalld
+    - firewalld
 
-# - name: firewalld | debug stat_rhel_firewalld_service_get_service_port_add type_debug
+# - name: firewalld | debug stat_firewalld_service_get_service_port_add type_debug
 #   debug: msg="item.item={{ item.item | last | type_debug }}"
 #   when: debug_enabled_default|bool
-#   loop: "{{ stat_rhel_firewalld_service_get_service_port_add.results|flatten(levels=1) }}"
+#   loop: "{{ stat_firewalld_service_get_service_port_add.results|flatten(levels=1) }}"
 #   loop_control:
 #     label: ""
 
-#Don't need to use set_fact to create new var? just use stat_rhel_firewalld_service_get_service_port_add.results with the magic of map etc
-# - name: firewalld | Set variable rhel_firewalld_add_name_port
+#Don't need to use set_fact to create new var? just use stat_firewalld_service_get_service_port_add.results with the magic of map etc
+# - name: firewalld | Set variable firewalld_add_name_port
 #   set_fact:
 #     # test123: "{{ test123|default([]) }} name: {{ item.item|map(attribute='name')|list|select('defined')|list }} + {{ item.item|last }}"
 #     # test123: "{{ test123|default([]) + [{'name': item.item|map(attribute='name')|list|select('defined')|list|join(', ') }] }}"
-#     rhel_firewalld_add_name_port: "{{ rhel_firewalld_add_name_port|default([]) + [{'name': item.item|map(attribute='name')|list|select('defined')|list|join(', ') , 'port': item.item|last} ] }}"
+#     firewalld_add_name_port: "{{ firewalld_add_name_port|default([]) + [{'name': item.item|map(attribute='name')|list|select('defined')|list|join(', ') , 'port': item.item|last} ] }}"
 #   when:
 #     - ansible_os_family == "RedHat"
 #     - ansible_distribution_major_version == '7'
-#     - rhel_firewalld_managed|bool
+#     - firewalld_managed|bool
 #     - item.rc != 0
-#   loop: "{{ stat_rhel_firewalld_service_get_service_port_add.results|flatten(levels=1) }}"
+#   loop: "{{ stat_firewalld_service_get_service_port_add.results|flatten(levels=1) }}"
 #   loop_control:
 #     label: ""
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
-# - name: firewalld | show variable rhel_firewalld_add_name_port
-#   debug: var=rhel_firewalld_add_name_port
-#   when: debug_enabled_default|bool and rhel_firewalld_add_name_port is defined
+# - name: firewalld | show variable firewalld_add_name_port
+#   debug: var=firewalld_add_name_port
+#   when: debug_enabled_default|bool and firewalld_add_name_port is defined
 
-# - name: firewalld | show variable rhel_firewalld_add_name_port items
+# - name: firewalld | show variable firewalld_add_name_port items
 #   debug: msg="name={{ item.name }}, port={{ item.port }}"
 #   when: debug_enabled_default|bool and item is defined
-#   loop: "{{ rhel_firewalld_add_name_port|flatten(levels=1) }}"
+#   loop: "{{ firewalld_add_name_port|flatten(levels=1) }}"
 #   loop_control:
 #     label: ""
 
 # - name: firewalld | Set port for service
 #   command: "firewall-offline-cmd --service={{ item.name }} --add-port={{ item.port }}"
 #   # with_subelements:
-#   #   - "{{ rhel_firewalld_custom_service|default({}) }}"
+#   #   - "{{ firewalld_custom_service|default({}) }}"
 #   #   - port_protocol
 #   with_items:
-#     # - "{{ rhel_firewalld_custom_service|default({}) }}"
-#     - "{{ rhel_firewalld_add_name_port }}"
+#     # - "{{ firewalld_custom_service|default({}) }}"
+#     - "{{ firewalld_add_name_port }}"
 #   when:
 #     - ansible_os_family == "RedHat"
 #     - ansible_distribution_major_version == '7'
-#     - rhel_firewalld_managed|bool
+#     - firewalld_managed|bool
 #     - item is defined
 #     # - item.state == 'enabled'
 #     # - item.rc != 0
@@ -424,54 +424,54 @@
 #   loop_control:
 #     label: "{{ item.name }} - added port: {{ item.port }}"
 #   tags:
-#     - rhel_firewalld
-#     - rhel_firewalld_create_service
+#     - firewalld
+#     - firewalld_create_service
 
-#Don't need to use set_fact to create new var. just use stat_rhel_firewalld_service_get_service_port_add.results with the magic of map etc
+#Don't need to use set_fact to create new var. just use stat_firewalld_service_get_service_port_add.results with the magic of map etc
 - name: firewalld | Add port for custom service
   command: "firewall-offline-cmd --service={{ item.item|map(attribute='name')|list|select('defined')|list|join(', ') }} --add-port={{ item.item|last }}"
   notify: Reload firewalld
   with_items:
-    - "{{ stat_rhel_firewalld_service_get_service_port_add.results }}"
+    - "{{ stat_firewalld_service_get_service_port_add.results }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - item.rc is defined
     # - item is not skipped
     - item.rc != 0
   loop_control:
     label: "{{ item.item|map(attribute='name')|list|select('defined')|list|join(', ') }} - added port: {{ item.item|last }}"
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_create_service
+    - firewalld
+    - firewalld_create_service
 
 # - name: pause
 #   pause:
 #     seconds: 30
-#   when: debug_enabled_default|bool and rhel_firewalld_managed|bool
+#   when: debug_enabled_default|bool and firewalld_managed|bool
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
 - name: debug stat_service_firewalld_services
   debug: var=stat_service_firewalld_services.stdout
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - debug_enabled_default|bool
     - stat_service_firewalld_status.rc == 0
   tags:
-    - rhel_firewalld
+    - firewalld
 
 - name: set fact firewalld reload needed
   set_fact:
-    rhel_firewalld_reload_hint_result: true
-  with_items: "{{ rhel_firewalld_custom_service }}"
+    firewalld_reload_hint_result: true
+  with_items: "{{ firewalld_custom_service }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - stat_service_firewalld_status.rc == 0
     # - stat_service_firewalld_services is failed
     - item.state == 'enabled'
@@ -479,18 +479,18 @@
   loop_control:
     label: "{{ item.name }} not in firewalld service list"
   tags:
-    - rhel_firewalld
+    - firewalld
 
-- name: debug rhel_firewalld_reload_hint_result
-  debug: var=rhel_firewalld_reload_hint_result
+- name: debug firewalld_reload_hint_result
+  debug: var=firewalld_reload_hint_result
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - debug_enabled_default|bool
     - stat_service_firewalld_status.rc == 0
   tags:
-    - rhel_firewalld
+    - firewalld
 
 #Reload firewall now (if running) so service is visible for next task
 #Don't reload if doing remove/re-add right away. not needed since service is visible
@@ -501,70 +501,70 @@
     name: firewalld
     state: reloaded
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
     - stat_service_firewalld_status.rc == 0
-    - rhel_firewalld_reload_hint_result|bool
+    - firewalld_reload_hint_result|bool
   tags:
-    - rhel_firewalld
+    - firewalld
     - skip_ansible_lint
 
 # - name: pause
 #   pause:
 #     seconds: 30
-#   when: debug_enabled_default|bool and rhel_firewalld_managed|bool
+#   when: debug_enabled_default|bool and firewalld_managed|bool
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
 #Not needed, use ansible firewalld module
 #Start - add service to zone
 #firewall-offline-cmd --zone=internal --query-service=app123-internal
 # - name: firewalld | Get service zone
 #   command: "firewall-offline-cmd --zone={{ item.zone }} --query-service={{ item.name }}"
-#   register: stat_rhel_firewalld_service_get_service_zone
+#   register: stat_firewalld_service_get_service_zone
 #   failed_when: false
 #   # failed_when: (" {{ item }} " not in stat_service_firewalld_services.stdout)
 #   # failed_when: '" " ~ item ~ " " not in stat_service_firewalld_services.stdout'
 #   ignore_errors: true
 #   changed_when: false
 #   # no_log: true
-#   with_items: "{{ rhel_firewalld_custom_service|default({}) }}"
+#   with_items: "{{ firewalld_custom_service|default({}) }}"
 #   when:
-#     - rhel_firewalld_managed|bool
+#     - firewalld_managed|bool
 #     # - stat_service_firewalld_status.rc == 0
 #   loop_control:
-#     # label: "{{ item.name }} - found=0, not found=1: {{ stat_rhel_firewalld_service_get_service_zone.rc }}"
-#     label: "{{ item.name }} - found: {{ 'True' if not stat_rhel_firewalld_service_get_service_zone.rc|bool else 'False' }}"
+#     # label: "{{ item.name }} - found=0, not found=1: {{ stat_firewalld_service_get_service_zone.rc }}"
+#     label: "{{ item.name }} - found: {{ 'True' if not stat_firewalld_service_get_service_zone.rc|bool else 'False' }}"
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
-# # - name: debug stat_rhel_firewalld_service_get_service_zone
-# #   debug: var=stat_rhel_firewalld_service_get_service_zone
-# #   # with_items: "{{ stat_rhel_firewalld_service_get_service_zone.results }}"
+# # - name: debug stat_firewalld_service_get_service_zone
+# #   debug: var=stat_firewalld_service_get_service_zone
+# #   # with_items: "{{ stat_firewalld_service_get_service_zone.results }}"
 # #   when:
 # #     - debug_enabled_default|bool
-# #     - rhel_firewalld_managed|bool
+# #     - firewalld_managed|bool
 # #     # - stat_service_firewalld_status.rc == 0
 # #   tags:
-# #     - rhel_firewalld
+# #     - firewalld
 
 # - name: firewalld | Add service to zone
 #   command: "firewall-offline-cmd --zone={{ item.item.zone }} --add-service={{ item.item.name }}"
 #   with_items:
-#     # - "{{ rhel_firewalld_custom_service|default({}) }}"
-#     - "{{ stat_rhel_firewalld_service_get_service_zone.results }}"
+#     # - "{{ firewalld_custom_service|default({}) }}"
+#     - "{{ stat_firewalld_service_get_service_zone.results }}"
 #   when:
 #     - ansible_os_family == "RedHat"
 #     - ansible_distribution_major_version == '7'
-#     - rhel_firewalld_managed|bool
+#     - firewalld_managed|bool
 #     - item.item.state == 'enabled'
 #     - item.rc != 0
 #   loop_control:
 #     label: "{{ item.item.name }} - added to zone: {{ item.item.zone }}"
 #   tags:
-#     - rhel_firewalld
-#     - rhel_firewalld_create_service
+#     - firewalld
+#     - firewalld_create_service
 
 - name: firewalld | Add/Remove service in zone
   # command: 'firewall-offline-cmd --zone=internal --add-service=app123-internal'
@@ -575,16 +575,16 @@
     offline: yes
     permanent: yes
   notify: Reload firewalld
-  with_items: "{{ rhel_firewalld_custom_service|default({}) }}"
+  with_items: "{{ firewalld_custom_service|default({}) }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
   loop_control:
-    # label: "{{ item.name }} - found=0, not found=1: {{ stat_rhel_firewalld_service_get_service_zone.rc }}"
+    # label: "{{ item.name }} - found=0, not found=1: {{ stat_firewalld_service_get_service_zone.rc }}"
     label: "{{ item.name }} - {{ item.state }} in zone {{ item.zone }}"
   tags:
-    - rhel_firewalld
+    - firewalld
 #End - add service to zone
 
 #firewall-offline-cmd --zone=internal --add-service=zabbix-agent
@@ -596,9 +596,9 @@
 #     offline: yes
 #     permanent: yes
 #   notify: Reload firewalld
-#   when: rhel_firewalld_managed|bool
+#   when: firewalld_managed|bool
 #   tags:
-#     - rhel_firewalld
+#     - firewalld
 
 #Remove default firewalld services that are not needed from internal zone
 - name: firewalld | Remove default firewalld services from internal zone
@@ -609,15 +609,15 @@
     offline: yes
     permanent: yes
   notify: Reload firewalld
-  with_items: "{{ rhel_firewalld_internal_remove_default }}"
+  with_items: "{{ firewalld_internal_remove_default }}"
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
-    - rhel_firewalld_internal_remove_default is defined
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    - firewalld_internal_remove_default is defined
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_remove_default
+    - firewalld
+    - firewalld_remove_default
 
 - name: firewalld | Start the firewalld service
   systemd:
@@ -625,10 +625,10 @@
     state: started
     enabled: yes
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
-    - rhel_firewalld_managed|bool
-    - rhel_firewalld_start|bool
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    - firewalld_start|bool
   tags:
-    - rhel_firewalld
-    - rhel_firewalld_start
+    - firewalld
+    - firewalld_start

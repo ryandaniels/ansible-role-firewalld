@@ -2,21 +2,21 @@
 debug_enabled_default: false
 proxy_env: []
 
-rhel_firewalld_managed: true
-rhel_firewalld_start: false
-rhel_firewalld_hint_service_name_result: false
-rhel_firewalld_reload_hint_result: false
+firewalld_managed: false
+firewalld_start: false
+firewalld_hint_service_name_result: false
+firewalld_reload_hint_result: false
 
-rhel_firewalld_managed_pkg: true
-rhel_firewalld_packages:
+firewalld_managed_pkg: true
+firewalld_packages:
   - firewalld
 
-# rhel_firewalld_internal_remove_default: []
-rhel_firewalld_internal_remove_default:
+# firewalld_internal_remove_default: []
+firewalld_internal_remove_default:
   - mdns
   - samba-client
 
-rhel_firewalld_zone_source:
+firewalld_zone_source:
   - zone: internal
     state: enabled
     # state: disabled
@@ -36,7 +36,7 @@ rhel_firewalld_zone_source:
   #     - "192.168.48.192/26"
   #     - "192.168.49.192/26"
 
-rhel_firewalld_custom_service:
+firewalld_custom_service:
   - name: app123-public
     zone: public
     # state: disabled

@@ -20,12 +20,14 @@ firewalld manual: <https://firewalld.org/documentation/>
 ## Distros tested
 
 * CentOS: 7.6, 7.7
+* Arch Linux (firewalld version 0.8.1) - But who would run a bunch of Arch servers..
 
 ## Dependencies
 
 * firewalld
 
-Tested with version 0.6.3 (Latest available in CentOS)
+Tested with version 0.6.3 (Latest available in CentOS)  
+Tested with version 0.8.1 (Latest available in Arch Linux)  
 
 ## Default Settings
 
@@ -44,7 +46,7 @@ proxy_env: []
 * Remove unwanted default services from internal zone
 
 ```yaml
-rhel_firewalld_internal_remove_default:
+firewalld_internal_remove_default:
   - mdns
   - samba-client
 ```
@@ -52,7 +54,7 @@ rhel_firewalld_internal_remove_default:
 * Install firewalld package
 
 ```yaml
-rhel_firewalld_managed_pkg: true
+firewalld_managed_pkg: true
 ```
 
 * Zone Config
@@ -60,7 +62,7 @@ rhel_firewalld_managed_pkg: true
 Full list of firewalld predefined zones: <https://firewalld.org/documentation/zone/predefined-zones.html>
 
 ```yaml
-rhel_firewalld_zone_source:
+firewalld_zone_source:
   - zone: name of predefined zone (ex. internal|public) (Required)
     state: enabled|disabled (Required)
     source:
@@ -70,12 +72,12 @@ rhel_firewalld_zone_source:
 * Service and Port Config
 
 ```yaml
-rhel_firewalld_custom_service:
+firewalld_custom_service:
   - name: service name (Required)
     zone: public|internal etc (See zone list above) (Required)
     state: enabled (Required)
     description: Description of service (Optional)
-    port_protocol: (Required, unless a built-in service)
+    port_protocol: (Required, unless a built-in service except when changing a default port for built-in service)
       - port/protocol (Required, unless a built-in service)
 ```
 
@@ -103,7 +105,7 @@ Custom services will be created with port(s) specified, and added to a zone:
 
 ```yaml
 ---
-rhel_firewalld_zone_source:
+firewalld_zone_source:
   - zone: internal
     state: enabled
     source:
@@ -115,7 +117,7 @@ rhel_firewalld_zone_source:
       - "192.168.32.64/26"
       - "192.168.33.64/26"
 
-rhel_firewalld_custom_service:
+firewalld_custom_service:
   - name: app123-public
     zone: public
     # state: disabled
@@ -150,34 +152,36 @@ rhel_firewalld_custom_service:
 - hosts: '{{ inventory }}'
   become: yes
   vars:
-    # Use this role
-    rhel_firewalld_managed: true
+    # Use this role #RTFM
+    # firewalld_managed: true
   roles:
   - firewalld
 ```
 
 ## Usage
 
+By default no tasks will run unless you set `firewalld_managed=true`. This is by design to prevent accidents by people who don't RTFM.
+
 ```bash
-ansible-playbook firewalld.yml --extra-vars "inventory=centos7" -i hosts-dev
+ansible-playbook firewalld.yml --extra-vars "inventory=centos7 firewalld_managed=true" -i hosts-dev
 ```
 
 Skip installing packages (if known already there - speeds up task)
 
 ```bash
-ansible-playbook firewalld.yml --extra-vars "inventory=all-dev" -i hosts --skip-tags=rhel_firewalld_pkg_install
+ansible-playbook firewalld.yml --extra-vars "inventory=all-dev firewalld_managed=true" -i hosts --skip-tags=firewalld_pkg_install
 ```
 
 Show more verbose output (debug info)
 
 ```bash
-ansible-playbook firewalld.yml --extra-vars "inventory=centos7 debug_enabled_default=true" -i hosts-dev
+ansible-playbook firewalld.yml --extra-vars "inventory=centos7 firewalld_managed=true debug_enabled_default=true" -i hosts-dev
 ```
 
 Start firewalld service at end of role
 
 ```bash
-ansible-playbook firewalld.yml --extra-vars "inventory=centos7 rhel_firewalld_start=true" -i hosts-dev
+ansible-playbook firewalld.yml --extra-vars "inventory=centos7 firewalld_managed=true firewalld_start=true" -i hosts-dev
 ```
 
 ## TODO
@@ -248,4 +252,23 @@ firewall-offline-cmd --info-service=app123-public
 firewall-offline-cmd --info-service=app123-internal
 
 firewall-cmd --reload
+```
+
+## iptables Command Reference
+
+List iptables that are active:
+
+```bash
+iptables -nL
+```
+
+## nftables Command Reference
+
+List nftables that are active:
+
+```bash
+nft list tables
+nft list ruleset
+nft list table inet firewalld
+nft list chain inet firewalld filter_IN_public_allow
 ```

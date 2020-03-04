@@ -4,4 +4,4 @@
   systemd:
     name: firewalld
     state: reloaded
-  when: rhel_firewalld_managed|bool and stat_service_firewalld_status.rc == 0
+  when: firewalld_managed|bool and stat_service_firewalld_status.rc == 0
