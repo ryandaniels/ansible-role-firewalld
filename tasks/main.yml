@@ -120,7 +120,6 @@
 #    - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
-    # - firewalld_hint_service_name_result|bool
     - item.state == 'enabled'
     - '" " ~ item.name ~ " " not in stat_service_firewalld_services.stdout'
   loop_control:
@@ -446,13 +445,6 @@
     - firewalld
     - firewalld_create_service
 
-# - name: pause
-#   pause:
-#     seconds: 30
-#   when: debug_enabled_default|bool and firewalld_managed|bool
-#   tags:
-#     - firewalld
-
 - name: debug stat_service_firewalld_services
   debug: var=stat_service_firewalld_services.stdout
   when:
@@ -510,62 +502,6 @@
     - firewalld
     - skip_ansible_lint
 
-# - name: pause
-#   pause:
-#     seconds: 30
-#   when: debug_enabled_default|bool and firewalld_managed|bool
-#   tags:
-#     - firewalld
-
-#Not needed, use ansible firewalld module
-#Start - add service to zone
-#firewall-offline-cmd --zone=internal --query-service=app123-internal
-# - name: firewalld | Get service zone
-#   command: "firewall-offline-cmd --zone={{ item.zone }} --query-service={{ item.name }}"
-#   register: stat_firewalld_service_get_service_zone
-#   failed_when: false
-#   # failed_when: (" {{ item }} " not in stat_service_firewalld_services.stdout)
-#   # failed_when: '" " ~ item ~ " " not in stat_service_firewalld_services.stdout'
-#   ignore_errors: true
-#   changed_when: false
-#   # no_log: true
-#   with_items: "{{ firewalld_custom_service|default({}) }}"
-#   when:
-#     - firewalld_managed|bool
-#     # - stat_service_firewalld_status.rc == 0
-#   loop_control:
-#     # label: "{{ item.name }} - found=0, not found=1: {{ stat_firewalld_service_get_service_zone.rc }}"
-#     label: "{{ item.name }} - found: {{ 'True' if not stat_firewalld_service_get_service_zone.rc|bool else 'False' }}"
-#   tags:
-#     - firewalld
-
-# # - name: debug stat_firewalld_service_get_service_zone
-# #   debug: var=stat_firewalld_service_get_service_zone
-# #   # with_items: "{{ stat_firewalld_service_get_service_zone.results }}"
-# #   when:
-# #     - debug_enabled_default|bool
-# #     - firewalld_managed|bool
-# #     # - stat_service_firewalld_status.rc == 0
-# #   tags:
-# #     - firewalld
-
-# - name: firewalld | Add service to zone
-#   command: "firewall-offline-cmd --zone={{ item.item.zone }} --add-service={{ item.item.name }}"
-#   with_items:
-#     # - "{{ firewalld_custom_service|default({}) }}"
-#     - "{{ stat_firewalld_service_get_service_zone.results }}"
-#   when:
-#     - ansible_os_family == "RedHat"
-#     - ansible_distribution_major_version == '7'
-#     - firewalld_managed|bool
-#     - item.item.state == 'enabled'
-#     - item.rc != 0
-#   loop_control:
-#     label: "{{ item.item.name }} - added to zone: {{ item.item.zone }}"
-#   tags:
-#     - firewalld
-#     - firewalld_create_service
-
 - name: firewalld | Add/Remove service in zone
   # command: 'firewall-offline-cmd --zone=internal --add-service=app123-internal'
   firewalld:
@@ -586,19 +522,6 @@
   tags:
     - firewalld
 #End - add service to zone
-
-#firewall-offline-cmd --zone=internal --add-service=zabbix-agent
-# - name: firewalld | Add zabbix-agent service
-#   firewalld:
-#     service: zabbix-agent
-#     zone: internal
-#     state: enabled
-#     offline: yes
-#     permanent: yes
-#   notify: Reload firewalld
-#   when: firewalld_managed|bool
-#   tags:
-#     - firewalld
 
 #Remove default firewalld services that are not needed from internal zone
 - name: firewalld | Remove default firewalld services from internal zone

@@ -43,18 +43,32 @@ debug_enabled_default: false
 proxy_env: []
 ```
 
-* Remove unwanted default services from internal zone
+* Role disabled by default. Change to true in group_vars or playbook etc
 
 ```yaml
-firewalld_internal_remove_default:
-  - mdns
-  - samba-client
+firewalld_managed: false
+```
+
+* Start firewalld service
+
+```yaml
+firewalld_start: false
 ```
 
 * Install firewalld package
 
 ```yaml
 firewalld_managed_pkg: true
+```
+
+## User Settings
+
+* Remove unwanted default services from internal zone
+
+```yaml
+firewalld_internal_remove_default:
+  - mdns
+  - samba-client
 ```
 
 * Zone Config
@@ -184,16 +198,6 @@ Start firewalld service at end of role
 ansible-playbook firewalld.yml --extra-vars "inventory=centos7 firewalld_managed=true firewalld_start=true" -i hosts-dev
 ```
 
-## TODO
-
-* [x] Get working with firewalld started or stopped
-* [ ] Confirm this everywhere needed:   notify: Reload firewalld
-* [ ] Add more tags to tasks
-* [x] Test this actually works if firewalld service is running and doesn't block traffic to running app
-* [ ] Build travis tests for many scenarios
-* [ ] Improve/shorten changing/removing a port
-* [ ] --diff doesn't show much since using many commands. Show what's going to happen and add pause when is debug enabled?
-
 ## firewalld Command Reference
 
 More commands can be found in firewalld documentation: <https://firewalld.org/documentation/man-pages/firewall-offline-cmd>
@@ -272,3 +276,13 @@ nft list ruleset
 nft list table inet firewalld
 nft list chain inet firewalld filter_IN_public_allow
 ```
+
+## TODO
+
+* [x] Get working with firewalld started or stopped
+* [x] Confirm reload everywhere needed: "notify: Reload firewalld"
+* [ ] Add more tags to tasks
+* [x] Test this actually works if firewalld service is running and doesn't block traffic to running app
+* [ ] Build travis tests for many scenarios
+* [ ] Improve/shorten changing/removing a port
+* [ ] --diff doesn't show much since using many commands. Show what's going to happen and add pause when is debug enabled?
