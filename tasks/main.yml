@@ -266,7 +266,7 @@
 
 - name: firewalld | Set variable firewalld_service_port_list
   set_fact:
-    firewalld_service_port_list: "{{ firewalld_service_port_list|default([]) + [{'name': item.item.name , 'port_protocol': item.item.port_protocol , 'port_stdout': item.stdout.split(' ')} ] }}"
+    firewalld_service_port_list: "{{ firewalld_service_port_list|default([]) + [{'name': item.item.name , 'port_protocol': item.item.port_protocol , 'port_stdout': item.stdout.split(' ')} ] }}" # noqa 204
   when:
 #    - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
