@@ -568,6 +568,7 @@
 #    - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
+    - ansible_virtualization_type|lower == "docker"
   tags:
     - firewalld
     - firewalld_start
@@ -657,19 +658,19 @@
     - firewalld
     - firewalld_start
 
-- name: show setup
-  setup:
-    gather_subset:
-      - 'all'
-  register: stat_setup
+# - name: show setup
+#   setup:
+#     gather_subset:
+#       - 'all'
+#   register: stat_setup
 
-- name: debug stat_setup
-  debug: var=stat_setup
-  when:
-    # - ansible_os_family == "RedHat"
-    # - ansible_distribution_major_version == '7'
-    - firewalld_managed|bool
-    # - debug_enabled_default|bool
-  tags:
-    - firewalld
-    - firewalld_start
+# - name: debug stat_setup
+#   debug: var=stat_setup
+#   when:
+#     # - ansible_os_family == "RedHat"
+#     # - ansible_distribution_major_version == '7'
+#     - firewalld_managed|bool
+#     # - debug_enabled_default|bool
+#   tags:
+#     - firewalld
+#     - firewalld_start
