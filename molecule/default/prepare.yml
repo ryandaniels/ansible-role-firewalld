@@ -13,6 +13,13 @@
 # for i in /sys/module/*; do echo kernel/${i##**/}.ko; done >> ${MODULES_DIR}/modules.builtin
 # depmod -a
 
+  - name: firewalld | Install packages dependencies
+    package:
+      name: kmod
+      update_cache: yes
+      state: installed
+    environment: "{{ proxy_env }}"
+
   - name: firewalld | fix OpenVZ virtualization or custom kernel missing kernel modules
     shell: MODULES_DIR=/lib/modules/$(uname -r) && \
           mkdir -p ${MODULES_DIR} && \
