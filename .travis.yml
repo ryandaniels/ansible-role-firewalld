@@ -1,6 +1,7 @@
 ---
 language: python
 # python: "2.7"
+services: docker
 
 # Use the new container infrastructure
 sudo: false
