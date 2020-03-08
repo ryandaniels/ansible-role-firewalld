@@ -16,8 +16,9 @@ env:
     - ROLE_NAME: firewalld
   matrix:
     - MOLECULE_DISTRO: centos:7
+    - MOLECULE_DISTRO: fedora:29
     - MOLECULE_DISTRO: fedora:31
-    - MOLECULE_DISTRO: archlinux
+    # - MOLECULE_DISTRO: archlinux
 
 install:
   # Install ansible

@@ -41,7 +41,7 @@
 #    - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
-    - debug_enabled_default|bool
+    # - debug_enabled_default|bool
   tags:
     - firewalld
 
@@ -51,7 +51,7 @@
     # - ansible_os_family == "RedHat"
     # - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
-    - debug_enabled_default|bool
+    # - debug_enabled_default|bool
   tags:
     - firewalld
 
@@ -115,8 +115,8 @@
   tags:
     - firewalld
 
-- name: debug stat_service_firewalld_services
-  debug: var=stat_service_firewalld_services.stdout
+- name: debug stat_service_firewalld_services.stdout.split()
+  debug: var=stat_service_firewalld_services.stdout.split()
   when:
 #    - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
@@ -140,7 +140,7 @@
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
     - item.state == 'disabled'
-    - '" " ~ item.name ~ " " in stat_service_firewalld_services.stdout'
+    - 'item.name in stat_service_firewalld_services.stdout.split()'
   loop_control:
     label: "Removed service name: {{ item.name }}"
   tags:
@@ -162,7 +162,7 @@
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
     - item.state == 'enabled'
-    - '" " ~ item.name ~ " " not in stat_service_firewalld_services.stdout'
+    - 'item.name not in stat_service_firewalld_services.stdout.split()'
   loop_control:
     label: "Created service name: {{ item.name }}"
   tags:
@@ -486,16 +486,16 @@
     - firewalld
     - firewalld_create_service
 
-- name: debug stat_service_firewalld_services
-  debug: var=stat_service_firewalld_services.stdout
-  when:
-#    - ansible_os_family == "RedHat"
-#    - ansible_distribution_major_version == '7'
-    - firewalld_managed|bool
-    - debug_enabled_default|bool
-    - stat_service_firewalld_status.rc == 0
-  tags:
-    - firewalld
+# - name: debug stat_service_firewalld_services
+#   debug: var=stat_service_firewalld_services.stdout
+#   when:
+# #    - ansible_os_family == "RedHat"
+# #    - ansible_distribution_major_version == '7'
+#     - firewalld_managed|bool
+#     - debug_enabled_default|bool
+#     - stat_service_firewalld_status.rc == 0
+#   tags:
+#     - firewalld
 
 - name: set fact firewalld reload needed
   set_fact:
@@ -508,7 +508,7 @@
     - stat_service_firewalld_status.rc == 0
     # - stat_service_firewalld_services is failed
     - item.state == 'enabled'
-    - '" " ~ item.name ~ " " not in stat_service_firewalld_services.stdout'
+    - 'item.name not in stat_service_firewalld_services.stdout.split()'
   loop_control:
     label: "{{ item.name }} not in firewalld service list"
   tags:

@@ -3,7 +3,7 @@
   hosts: all
   tasks:
 
-#Fix for OpenVZ virtualization / custom kernel missing modules needed by firewalld
+#Fix for CentOS 7 on OpenVZ virtualization / custom kernel missing modules needed by firewalld
 #source: https://www.getpagespeed.com/server-setup/fix-firewalld-in-centos-7
 # MODULES_DIR=/lib/modules/$(uname -r)
 # mkdir -p ${MODULES_DIR}
@@ -30,18 +30,20 @@
   #    - ansible_distribution_major_version == '7'
       # - firewalld_managed|bool
       - ansible_virtualization_type|lower == "docker"
+      - ansible_os_family|lower == "redhat"
     tags:
       - firewalld
       - firewalld_start
 
-  - name: debug fix OpenVZ output
-    debug: var=cmd
-    when:
-      # - ansible_os_family == "RedHat"
-      # - ansible_distribution_major_version == '7'
-      # - firewalld_managed|bool
-      - ansible_virtualization_type|lower == "docker"
-      # - debug_enabled_default|bool
-    tags:
-      - firewalld
-      - firewalld_start
+  # - name: debug fix OpenVZ output
+  #   debug: var=cmd
+  #   when:
+  #     # - ansible_os_family == "RedHat"
+  #     # - ansible_distribution_major_version == '7'
+  #     # - firewalld_managed|bool
+  #     - ansible_virtualization_type|lower == "docker"
+  #     - ansible_os_family|lower == "redhat"
+  #     # - debug_enabled_default|bool
+  #   tags:
+  #     - firewalld
+  #     - firewalld_start
