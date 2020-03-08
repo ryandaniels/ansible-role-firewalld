@@ -11,7 +11,9 @@ driver:
 platforms:
   - name: instance
     privileged: true
-    image: centos:7.6.1810
+    # image: centos:7.6.1810
+    # image: centos:7.7.1908
+    image: centos:7
     command: /sbin/init
     # image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
     # command: ${MOLECULE_DOCKER_COMMAND:-""}
