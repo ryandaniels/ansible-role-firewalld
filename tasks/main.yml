@@ -556,6 +556,14 @@
     - firewalld
     - firewalld_start
 
+- name: pause
+  pause:
+    seconds: 10
+  when: firewalld_managed|bool
+  tags:
+    - firewalld
+    - firewalld_start
+
 - name: firewalld | check if running. rc 0 means it is
   command: systemctl status firewalld warn=false
   register: stat_service_firewalld_status
@@ -569,6 +577,7 @@
     - firewalld_managed|bool
   tags:
     - firewalld
+    - firewalld_start
 
 - name: debug stat_service_firewalld_status
   debug: var=stat_service_firewalld_status.stdout_lines
@@ -579,3 +588,4 @@
     # - debug_enabled_default|bool
   tags:
     - firewalld
+    - firewalld_start
