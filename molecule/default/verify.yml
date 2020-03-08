@@ -72,7 +72,7 @@
   # - sudo firewall-cmd --permanent --zone=public --query-service=app123-public
   # # Check service created and not in internal zone
   # - sudo firewall-cmd --permanent --zone=internal --query-service=app123-public || echo "success, not found"
-  
+
   # # Check port added to custom service
   # - sudo firewall-cmd --permanent --service=app123-public --query-port=5000/tcp
 
