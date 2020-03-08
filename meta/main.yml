@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  role_name: firewalld
+  author: Ryan Daniels
+  description: Role to manage firewalld configuration using simple variables
+  license: MIT
+  min_ansible_version: 2.3
+  platforms:
+    - name: EL
+      versions:
+        - 7
+    - name: Fedora
+      versions:
+        - all
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - firewalld
+    - system
+    - security
+    - networking
+    - tcp
+    - port
+
+dependencies: []
