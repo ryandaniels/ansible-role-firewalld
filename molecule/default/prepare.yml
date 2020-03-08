@@ -1,0 +1,53 @@
+---
+- name: Prepare
+  hosts: all
+  vars:
+    proxy_env: []
+
+  tasks:
+
+#Fix for CentOS 7 on OpenVZ virtualization / custom kernel missing modules needed by firewalld
+#source: https://www.getpagespeed.com/server-setup/fix-firewalld-in-centos-7
+# MODULES_DIR=/lib/modules/$(uname -r)
+# mkdir -p ${MODULES_DIR}
+# # touch ${MODULES_DIR}/modules.{builtin,order}
+# /bin/truncate --size=0 ${MODULES_DIR}/modules.builtin
+# /bin/truncate --size=0 ${MODULES_DIR}/modules.order
+# for i in /sys/module/*; do echo kernel/${i##**/}.ko; done >> ${MODULES_DIR}/modules.builtin
+# depmod -a
+
+  - name: firewalld | Install packages dependencies for OpenVZ / custom kernel workaround
+    package:
+      name: kmod
+      update_cache: yes
+      state: installed
+    environment: "{{ proxy_env }}"
+    when:
+      - ansible_virtualization_type|lower == "docker"
+      - ansible_os_family|lower == "redhat"
+
+  - name: firewalld | fix OpenVZ virtualization or custom kernel missing kernel modules
+    shell: MODULES_DIR=/lib/modules/$(uname -r) && \
+          mkdir -p ${MODULES_DIR} && \
+          /bin/truncate --size=0 ${MODULES_DIR}/modules.builtin && \
+          /bin/truncate --size=0 ${MODULES_DIR}/modules.order && \
+          for i in /sys/module/*; do echo kernel/${i##**/}.ko; done >> ${MODULES_DIR}/modules.builtin && \
+          depmod -a
+    register: cmd
+    # failed_when: false
+    ignore_errors: true
+    # changed_when: false
+    # no_log: True
+    when:
+      - ansible_virtualization_type|lower == "docker"
+      - ansible_os_family|lower == "redhat"
+
+  # - name: debug fix OpenVZ output
+  #   debug: var=cmd
+  #   when:
+  #     # - ansible_os_family == "RedHat"
+  #     # - ansible_distribution_major_version == '7'
+  #     # - firewalld_managed|bool
+  #     - ansible_virtualization_type|lower == "docker"
+  #     - ansible_os_family|lower == "redhat"
+  #     # - debug_enabled_default|bool

@@ -1,11 +1,10 @@
 # ansible-role-firewalld
 
-WIP: Use Caution! All the basics should work as described below.
-
 Add local firewall rules on server via firewalld.  
 Why another Ansible role to manage firewalld? The role does everything in "offline" mode. Even creating a new service works offline.  
 So there should be no issues when firewalld starts, and blocks EVERYTHING by default! (Make sure you test in non-production first, I cannot make any guarantees)
 This supports adding custom firewalld "services" into zones with custom ports. Also can add or remove ports for built-in services provided by firewalld.  
+Removes unwanted default services from public/internal zone.  
 
 Zones: Add IP ranges to Zones.  To remove, change state to `disabled`. If only one IP range needs to be disabled, create a new zone entry for just that IP range.  
 Services: `disable` a service will remove it from that zone as specified in the variables. Don't just delete the config to remove it!  
@@ -20,6 +19,7 @@ firewalld manual: <https://firewalld.org/documentation/>
 ## Distros tested
 
 * CentOS: 7.6, 7.7
+* Fedora 30, 31
 * Arch Linux (firewalld version 0.8.1) - But who would run a bunch of Arch servers..
 
 ## Dependencies
@@ -27,6 +27,8 @@ firewalld manual: <https://firewalld.org/documentation/>
 * firewalld
 
 Tested with version 0.6.3 (Latest available in CentOS)  
+Tested with version 0.6.6 (Latest available in Fedora 30)  
+Tested with version 0.7.3 (Latest available in Fedora 31)  
 Tested with version 0.8.1 (Latest available in Arch Linux)  
 
 ## Default Settings
@@ -62,6 +64,14 @@ firewalld_managed_pkg: true
 ```
 
 ## User Settings
+
+* Remove unwanted default services from public zone
+
+```yaml
+firewalld_public_remove_default:
+  - mdns
+  - samba-client
+```
 
 * Remove unwanted default services from internal zone
 
@@ -283,6 +293,6 @@ nft list chain inet firewalld filter_IN_public_allow
 * [x] Confirm reload everywhere needed: "notify: Reload firewalld"
 * [ ] Add more tags to tasks
 * [x] Test this actually works if firewalld service is running and doesn't block traffic to running app
-* [ ] Build travis tests for many scenarios
+* [x] Build travis tests for many scenarios
 * [ ] Improve/shorten changing/removing a port
 * [ ] --diff doesn't show much since using many commands. Show what's going to happen and add pause when is debug enabled?
