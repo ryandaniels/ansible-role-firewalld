@@ -1,6 +1,9 @@
 ---
 - name: Prepare
   hosts: all
+  vars:
+    proxy_env: []
+
   tasks:
 
 #Fix for CentOS 7 on OpenVZ virtualization / custom kernel missing modules needed by firewalld
@@ -19,6 +22,9 @@
       update_cache: yes
       state: installed
     environment: "{{ proxy_env }}"
+    when:
+      - ansible_virtualization_type|lower == "docker"
+      - ansible_os_family|lower == "redhat"
 
   - name: firewalld | fix OpenVZ virtualization or custom kernel missing kernel modules
     shell: MODULES_DIR=/lib/modules/$(uname -r) && \
@@ -33,14 +39,8 @@
     # changed_when: false
     # no_log: True
     when:
-  #    - ansible_os_family == "RedHat"
-  #    - ansible_distribution_major_version == '7'
-      # - firewalld_managed|bool
       - ansible_virtualization_type|lower == "docker"
       - ansible_os_family|lower == "redhat"
-    tags:
-      - firewalld
-      - firewalld_start
 
   # - name: debug fix OpenVZ output
   #   debug: var=cmd
@@ -51,6 +51,3 @@
   #     - ansible_virtualization_type|lower == "docker"
   #     - ansible_os_family|lower == "redhat"
   #     # - debug_enabled_default|bool
-  #   tags:
-  #     - firewalld
-  #     - firewalld_start
