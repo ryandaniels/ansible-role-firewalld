@@ -293,6 +293,6 @@ nft list chain inet firewalld filter_IN_public_allow
 * [x] Confirm reload everywhere needed: "notify: Reload firewalld"
 * [ ] Add more tags to tasks
 * [x] Test this actually works if firewalld service is running and doesn't block traffic to running app
-* [ ] Build travis tests for many scenarios
+* [x] Build travis tests for many scenarios
 * [ ] Improve/shorten changing/removing a port
 * [ ] --diff doesn't show much since using many commands. Show what's going to happen and add pause when is debug enabled?
