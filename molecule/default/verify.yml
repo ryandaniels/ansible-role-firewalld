@@ -11,7 +11,7 @@
     # no_log: True
     failed_when: not stat_service_firewalld_status.rc == 0
 
-  - debug: var=stat_service_firewalld_status
+  # - debug: var=stat_service_firewalld_status
 
   - name: Check source ip in internal zone
     command: firewall-cmd --permanent --zone=internal --query-source=192.168.22.64/26

@@ -45,7 +45,7 @@
   tags:
     - firewalld
 
-- name: debug stat_service_firewalld_status
+- name: debug stat_service_firewalld_version
   debug: var=stat_service_firewalld_version.stdout_lines
   when:
     # - ansible_os_family == "RedHat"
@@ -611,8 +611,8 @@
 
 - name: firewalld | check if running
   command: systemctl status firewalld warn=false
-  register: stat_service_firewalld_status
-  failed_when: not stat_service_firewalld_status.rc == 0
+  register: stat_service_firewalld_status_end
+  failed_when: not stat_service_firewalld_status_end.rc == 0
   # ignore_errors: true
   changed_when: false
   # no_log: True
@@ -626,8 +626,8 @@
     - firewalld
     - firewalld_start
 
-- name: debug stat_service_firewalld_status
-  debug: var=stat_service_firewalld_status.stdout_lines
+- name: debug stat_service_firewalld_status_end
+  debug: var=stat_service_firewalld_status_end.stdout_lines
   when:
     # - ansible_os_family == "RedHat"
     # - ansible_distribution_major_version == '7'
