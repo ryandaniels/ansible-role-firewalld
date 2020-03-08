@@ -1,0 +1,60 @@
+---
+language: python
+python: "2.7"
+sudo: required
+
+services:
+  - docker
+
+env:
+  matrix:
+    - os=centos version=7 container_id=$(mktemp) ANSIBLE_VERSION=latest
+
+install:
+  - sudo docker pull ${os}:${version}
+  - sudo docker build --file tests/travis/Dockerfile.${os}${version} --tag=${os}${version}:ansible tests/travis --build-arg ANSIBLE_VERSION=${ANSIBLE_VERSION}
+
+script:
+  # Check the role/playbook's syntax.
+  - ansible-playbook -i tests/inventory tests/test.yml --syntax-check
+  - ansible-playbook -i tests/inventory tests/test-change.yml --syntax-check
+
+  # Run the role/playbook with ansible-playbook.
+  - "ansible-playbook -i tests/inventory tests/test.yml --connection=local --become"
+
+  # Run the role/playbook again, checking to make sure it's idempotent.
+  - >
+    ansible-playbook -i tests/inventory tests/test.yml --connection=local --become
+    | grep -q 'changed=0.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    || (echo 'Idempotence test: fail' && exit 1)
+
+  # Check firewalld running
+  - systemctl status firewalld
+  # Check source ip in internal zone
+  - sudo firewall-cmd --permanent --zone=internal --query-source=192.168.22.64/26
+  # Check source ip not in internal zone
+  - sudo firewall-cmd --permanent --zone=internal --query-source=192.168.32.64/26 || echo "success, not found"
+  # Check service created and in public zone
+  - sudo firewall-cmd --permanent --zone=public --query-service=app123-public
+  # Check service created and not in internal zone
+  - sudo firewall-cmd --permanent --zone=internal --query-service=app123-public || echo "success, not found"
+  
+  # Check port added to custom service
+  - sudo firewall-cmd --permanent --service=app123-public --query-port=5000/tcp
+
+  # Check custom port added to built-in service
+  - sudo firewall-cmd --permanent --service=zabbix-agent --query-port=3333/tcp
+  # Check default port not added to built-in service
+  - sudo firewall-cmd --permanent --service=zabbix-agent --query-port=10050/tcp || echo "success, not found"
+
+  # Run the role/playbook again but make change
+  - "ansible-playbook -i tests/inventory tests/test-change.yml --connection=local --become"
+
+  # Check port not added to custom service when disabled
+  - sudo firewall-cmd --permanent --service=app123-public --query-port=5000/tcp || echo "success, not found"
+
+  # Check port added to custom service
+  - sudo firewall-cmd --permanent --service=app123-internal --query-port=8089/tcp
+  # Check port not added to custom service when removed from config
+  - sudo firewall-cmd --permanent --service=app123-internal --query-port=8080/tcp || echo "success, not found"

@@ -1,67 +1,26 @@
 ---
 language: python
-python: "2.7"
-env:
-  matrix:
-  - OS_TYPE=centos OS_VERSION=7
+services: docker
 
-before_install:
-  # Make sure everything's up to date.
-  - sudo apt-get update -qq
+env:
+  global:
+    - ROLE_NAME: firewalld
+  matrix:
+    - MOLECULE_DISTRO: centos7
 
 install:
-  # Install Ansible.
-  - pip install ansible
-  # - |
-  #   if [ -f requirements.yml ]; then
-  #     ansible-galaxy install --roles-path ../ -r requirements.yml
-  #   fi
+  # Install test dependencies.
+  - pip install molecule yamllint ansible-lint docker
 
-  # Add ansible.cfg to pick up roles path.
-#  - "printf '[defaults]\nroles_path = ../' > ansible.cfg"
-  - "{ echo '[defaults]'; echo 'roles_path = ../'; } >> ansible.cfg"
+before_script:
+  # Use actual Ansible Galaxy role name for the project directory.
+  - cd ../
+  - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
+  - cd ryandaniels.$ROLE_NAME
 
 script:
-  # Check the role/playbook's syntax.
-  - ansible-playbook -i tests/inventory tests/test.yml --syntax-check
-  - ansible-playbook -i tests/inventory tests/test-change.yml --syntax-check
+  # Run tests.
+  - molecule test
 
-  # Run the role/playbook with ansible-playbook.
-  - "ansible-playbook -i tests/inventory tests/test.yml --connection=local --become"
-
-  # Run the role/playbook again, checking to make sure it's idempotent.
-  - >
-    ansible-playbook -i tests/inventory tests/test.yml --connection=local --become
-    | grep -q 'changed=0.*failed=0'
-    && (echo 'Idempotence test: pass' && exit 0)
-    || (echo 'Idempotence test: fail' && exit 1)
-
-  # Check firewalld running
-  - systemctl status firewalld
-  # Check source ip in internal zone
-  - sudo firewall-cmd --permanent --zone=internal --query-source=192.168.22.64/26
-  # Check source ip not in internal zone
-  - sudo firewall-cmd --permanent --zone=internal --query-source=192.168.32.64/26 || echo "success, not found"
-  # Check service created and in public zone
-  - sudo firewall-cmd --permanent --zone=public --query-service=app123-public
-  # Check service created and not in internal zone
-  - sudo firewall-cmd --permanent --zone=internal --query-service=app123-public || echo "success, not found"
-  
-  # Check port added to custom service
-  - sudo firewall-cmd --permanent --service=app123-public --query-port=5000/tcp
-
-  # Check custom port added to built-in service
-  - sudo firewall-cmd --permanent --service=zabbix-agent --query-port=3333/tcp
-  # Check default port not added to built-in service
-  - sudo firewall-cmd --permanent --service=zabbix-agent --query-port=10050/tcp || echo "success, not found"
-
-  # Run the role/playbook again but make change
-  - "ansible-playbook -i tests/inventory tests/test-change.yml --connection=local --become"
-
-  # Check port not added to custom service when disabled
-  - sudo firewall-cmd --permanent --service=app123-public --query-port=5000/tcp || echo "success, not found"
-
-  # Check port added to custom service
-  - sudo firewall-cmd --permanent --service=app123-internal --query-port=8089/tcp
-  # Check port not added to custom service when removed from config
-  - sudo firewall-cmd --permanent --service=app123-internal --query-port=8080/tcp || echo "success, not found"
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
