@@ -588,6 +588,7 @@
     name: firewalld
     state: started
     enabled: yes
+  register: stat_service_firewalld_start
   when:
 #    - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
@@ -603,6 +604,7 @@
   when:
     - firewalld_managed|bool
     - firewalld_start|bool
+    - stat_service_firewalld_start.changed
   tags:
     - firewalld
     - firewalld_start
@@ -619,6 +621,7 @@
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
     - firewalld_start|bool
+    - stat_service_firewalld_start.changed
   tags:
     - firewalld
     - firewalld_start
@@ -630,6 +633,7 @@
     # - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
     - firewalld_start|bool
+    - stat_service_firewalld_start.changed
     - debug_enabled_default|bool
   tags:
     - firewalld
