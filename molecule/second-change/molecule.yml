@@ -10,9 +10,11 @@ driver:
 #     pre_build_image: true
 platforms:
   - name: instance
-    image: centos:7
-    command: /sbin/init
     privileged: true
+    # image: centos:7
+    image: ${MOLECULE_DISTRO:-centos:7}
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    # command: /sbin/init
     tmpfs:
       - /run
       - /tmp

@@ -3,6 +3,15 @@
   hosts: all
   tasks:
 
+  # - name: show setup
+  #   setup:
+  #     gather_subset:
+  #       - 'all'
+  #   register: stat_setup
+
+  # - name: debug stat_setup
+  #   debug: var=stat_setup
+
   - name: Check firewalld running
     command: systemctl status firewalld warn=false
     register: stat_service_firewalld_status
@@ -11,7 +20,16 @@
     # no_log: True
     failed_when: not stat_service_firewalld_status.rc == 0
 
-  # - debug: var=stat_service_firewalld_status
+  # - name: debug stat_service_firewalld_status
+  #   debug: var=stat_service_firewalld_status
+
+  - name: Check firewalld can reload
+    command: firewall-cmd --reload
+    register: stat_service_firewalld_reload
+    # ignore_errors: true
+    changed_when: false
+    # no_log: True
+    failed_when: not stat_service_firewalld_reload.rc == 0
 
   - name: Check source ip in internal zone
     command: firewall-cmd --permanent --zone=internal --query-source=192.168.22.64/26
@@ -47,6 +65,9 @@
     # ignore_errors: true
     changed_when: false
     failed_when: not cmd.rc == 0
+
+  # - name: debug Check port added to custom service cmd
+  #   debug: var=cmd
 
   - name: Check custom port added to built-in service
     command: firewall-cmd --permanent --service=zabbix-agent --query-port=3333/tcp

@@ -16,7 +16,7 @@
 # for i in /sys/module/*; do echo kernel/${i##**/}.ko; done >> ${MODULES_DIR}/modules.builtin
 # depmod -a
 
-  - name: firewalld | Install packages dependencies
+  - name: firewalld | Install packages dependencies for OpenVZ / custom kernel workaround
     package:
       name: kmod
       update_cache: yes

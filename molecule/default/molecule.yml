@@ -15,9 +15,9 @@ platforms:
     # image: centos:7.7.1908
     # image: centos:7
     image: ${MOLECULE_DISTRO:-centos:7}
-    command: /sbin/init
+    # command: /sbin/init
     # image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
-    # command: ${MOLECULE_DOCKER_COMMAND:-""}
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
     # pre_build_image: true
     tmpfs:
       - /run

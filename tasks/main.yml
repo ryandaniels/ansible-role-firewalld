@@ -638,3 +638,15 @@
   tags:
     - firewalld
     - firewalld_start
+
+#Fedora <30 claims firewalld is running but ip6tables is not working.
+#Force a reload check to be safe.
+- name: firewalld | Check firewalld can reload
+  command: firewall-cmd --reload
+  register: stat_service_firewalld_reload
+  changed_when: false
+  when:
+    # - ansible_os_family == "RedHat"
+    # - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    - (firewalld_start|bool or stat_service_firewalld_status.rc == 0)
