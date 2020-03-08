@@ -38,6 +38,7 @@ script:
   - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
   # - molecule test
   - molecule test --destroy=never && molecule test --scenario-name second-change
+  - molecule destroy
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
