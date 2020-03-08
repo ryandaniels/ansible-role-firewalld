@@ -556,6 +556,32 @@
     - firewalld
     - firewalld_start
 
+- name: firewalld | check version
+  command: firewall-offline-cmd -V warn=false
+  register: stat_service_firewalld_version
+  failed_when: false
+  ignore_errors: true
+  changed_when: false
+  # no_log: True
+  when:
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+  tags:
+    - firewalld
+    - firewalld_start
+
+- name: debug stat_service_firewalld_status
+  debug: var=stat_service_firewalld_version.stdout_lines
+  when:
+    # - ansible_os_family == "RedHat"
+    # - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    # - debug_enabled_default|bool
+  tags:
+    - firewalld
+    - firewalld_start
+
 - name: pause
   pause:
     seconds: 10
@@ -564,7 +590,7 @@
     - firewalld
     - firewalld_start
 
-- name: firewalld | check if running. rc 0 means it is
+- name: firewalld | check if running
   command: systemctl status firewalld warn=false
   register: stat_service_firewalld_status
   failed_when: false
