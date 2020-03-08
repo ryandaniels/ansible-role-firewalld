@@ -643,7 +643,6 @@
 #Force a reload check to be safe.
 - name: firewalld | Check firewalld can reload
   command: firewall-cmd --reload
-  register: stat_service_firewalld_reload
   changed_when: false
   when:
     # - ansible_os_family == "RedHat"
