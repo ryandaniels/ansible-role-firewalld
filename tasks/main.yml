@@ -552,7 +552,7 @@
 # for i in /sys/module/*; do echo kernel/${i##**/}.ko; done >> ${MODULES_DIR}/modules.builtin
 # depmod -a
 
-- name: firewalld | check if running
+- name: firewalld | fix OpenVZ virtualization or custom kernel missing kernel modules
   shell: MODULES_DIR=/lib/modules/$(uname -r) && \
         mkdir -p ${MODULES_DIR} && \
         /bin/truncate --size=0 ${MODULES_DIR}/modules.builtin && \
@@ -568,6 +568,17 @@
 #    - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
+  tags:
+    - firewalld
+    - firewalld_start
+
+- name: debug stat_service_firewalld_status
+  debug: var=cmd.stdout_lines
+  when:
+    # - ansible_os_family == "RedHat"
+    # - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    # - debug_enabled_default|bool
   tags:
     - firewalld
     - firewalld_start
@@ -645,3 +656,8 @@
   tags:
     - firewalld
     - firewalld_start
+
+- name: show setup
+  setup:
+    gather_subset:
+      - 'all'
