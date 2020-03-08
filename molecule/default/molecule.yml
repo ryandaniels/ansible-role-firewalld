@@ -10,15 +10,15 @@ driver:
 #     pre_build_image: true
 platforms:
   - name: instance
-    # image: centos:7
-    # command: /sbin/init
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
-    command: ${MOLECULE_DOCKER_COMMAND:-""}
-    pre_build_image: true
     privileged: true
-    # tmpfs:
-    #   - /run
-    #   - /tmp
+    image: centos:7.6.1810
+    command: /sbin/init
+    # image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
+    # command: ${MOLECULE_DOCKER_COMMAND:-""}
+    # pre_build_image: true
+    tmpfs:
+      - /run
+      - /tmp
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
 provisioner:

@@ -69,7 +69,7 @@
     #   command: env
     #   register: cmd
     # - debug: var=cmd
-    - name: "Include firewalld-home"
+    - name: "Include firewalld"
       include_role:
         # name: "firewalld-home"
         name: "ryandaniels.firewalld"
