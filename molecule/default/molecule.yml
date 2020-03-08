@@ -3,6 +3,10 @@ dependency:
   name: galaxy
 driver:
   name: docker
+# lint: |
+#   set -e
+#   yamllint .
+#   ansible-lint
 lint: ansible-lint
 # platforms:
 #   - name: instance
@@ -17,7 +21,7 @@ platforms:
     image: ${MOLECULE_DISTRO:-centos:7}
     # command: /sbin/init
     # image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
-    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    command: ${MOLECULE_DOCKER_COMMAND:-"/sbin/init"}
     # pre_build_image: true
     tmpfs:
       - /run
