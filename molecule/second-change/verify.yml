@@ -4,9 +4,6 @@
 - name: Verify
   hosts: all
   tasks:
-  - name: Example assertion
-    assert:
-      that: true
 
   - name: Check firewalld running
     command: systemctl status firewalld warn=false

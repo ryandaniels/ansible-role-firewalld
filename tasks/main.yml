@@ -1,18 +1,59 @@
 ---
+# - name: show setup
+#   setup:
+#     gather_subset:
+#       - 'all'
+#   register: stat_setup
+
+# - name: debug stat_setup
+#   debug: var=stat_setup
+#   when:
+#     # - ansible_os_family == "RedHat"
+#     # - ansible_distribution_major_version == '7'
+#     - firewalld_managed|bool
+#     # - debug_enabled_default|bool
+#   tags:
+#     - firewalld
+
 - name: Ensure required packages are installed (yum)
-  yum:
+  package:
     name: "{{ firewalld_packages|default([]) }}"
     update_cache: yes
     state: installed
   environment: "{{ proxy_env }}"
   when:
-    - ansible_os_family == "RedHat"
+    # - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
     - firewalld_managed_pkg|bool
   tags:
     - firewalld
     - firewalld_pkg_install
+
+- name: firewalld | check version
+  command: firewall-offline-cmd -V warn=false
+  register: stat_service_firewalld_version
+  failed_when: false
+  ignore_errors: true
+  changed_when: false
+  # no_log: True
+  when:
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    - debug_enabled_default|bool
+  tags:
+    - firewalld
+
+- name: debug stat_service_firewalld_status
+  debug: var=stat_service_firewalld_version.stdout_lines
+  when:
+    # - ansible_os_family == "RedHat"
+    # - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    - debug_enabled_default|bool
+  tags:
+    - firewalld
 
 - name: firewalld | check if running
   command: systemctl status firewalld warn=false
@@ -556,36 +597,12 @@
     - firewalld
     - firewalld_start
 
-- name: firewalld | check version
-  command: firewall-offline-cmd -V warn=false
-  register: stat_service_firewalld_version
-  failed_when: false
-  ignore_errors: true
-  changed_when: false
-  # no_log: True
-  when:
-#    - ansible_os_family == "RedHat"
-#    - ansible_distribution_major_version == '7'
-    - firewalld_managed|bool
-  tags:
-    - firewalld
-    - firewalld_start
-
-- name: debug stat_service_firewalld_status
-  debug: var=stat_service_firewalld_version.stdout_lines
-  when:
-    # - ansible_os_family == "RedHat"
-    # - ansible_distribution_major_version == '7'
-    - firewalld_managed|bool
-    # - debug_enabled_default|bool
-  tags:
-    - firewalld
-    - firewalld_start
-
-- name: pause
+- name: pause to wait in case firewalld service fails to start
   pause:
     seconds: 10
-  when: firewalld_managed|bool
+  when:
+    - firewalld_managed|bool
+    - firewalld_start|bool
   tags:
     - firewalld
     - firewalld_start
@@ -593,14 +610,15 @@
 - name: firewalld | check if running
   command: systemctl status firewalld warn=false
   register: stat_service_firewalld_status
-  failed_when: false
-  ignore_errors: true
+  failed_when: not stat_service_firewalld_status.rc == 0
+  # ignore_errors: true
   changed_when: false
-  no_log: True
+  # no_log: True
   when:
 #    - ansible_os_family == "RedHat"
 #    - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
+    - firewalld_start|bool
   tags:
     - firewalld
     - firewalld_start
@@ -611,24 +629,8 @@
     # - ansible_os_family == "RedHat"
     # - ansible_distribution_major_version == '7'
     - firewalld_managed|bool
-    # - debug_enabled_default|bool
+    - firewalld_start|bool
+    - debug_enabled_default|bool
   tags:
     - firewalld
     - firewalld_start
-
-# - name: show setup
-#   setup:
-#     gather_subset:
-#       - 'all'
-#   register: stat_setup
-
-# - name: debug stat_setup
-#   debug: var=stat_setup
-#   when:
-#     # - ansible_os_family == "RedHat"
-#     # - ansible_distribution_major_version == '7'
-#     - firewalld_managed|bool
-#     # - debug_enabled_default|bool
-#   tags:
-#     - firewalld
-#     - firewalld_start
