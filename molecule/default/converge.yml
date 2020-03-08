@@ -11,6 +11,11 @@
     firewalld_packages:
       - firewalld
 
+    # firewalld_public_remove_default: []
+    firewalld_public_remove_default:
+      - mdns
+      - samba-client
+
     # firewalld_internal_remove_default: []
     firewalld_internal_remove_default:
       - mdns

@@ -564,6 +564,25 @@
     - firewalld
 #End - add service to zone
 
+#Remove default firewalld services that are not needed from public zone
+- name: firewalld | Remove default firewalld services from public zone
+  firewalld:
+    service: "{{ item }}"
+    zone: public
+    state: disabled
+    offline: yes
+    permanent: yes
+  notify: Reload firewalld
+  with_items: "{{ firewalld_public_remove_default }}"
+  when:
+#    - ansible_os_family == "RedHat"
+#    - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    - firewalld_public_remove_default is defined
+  tags:
+    - firewalld
+    - firewalld_remove_default
+
 #Remove default firewalld services that are not needed from internal zone
 - name: firewalld | Remove default firewalld services from internal zone
   firewalld:
