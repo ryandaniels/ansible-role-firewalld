@@ -27,8 +27,8 @@ verifier:
   # directory: ../tests/
 scenario:
   test_sequence:
-    - create
-    - prepare
+    # - create
+    # - prepare
     - converge
     - verify
     - cleanup
