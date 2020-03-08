@@ -14,8 +14,8 @@ addons:
 env:
   global:
     - ROLE_NAME: firewalld
-  # matrix:
-  #   - MOLECULE_DISTRO: centos7
+  matrix:
+    - MOLECULE_DISTRO: centos7
 
 install:
   # Install ansible
