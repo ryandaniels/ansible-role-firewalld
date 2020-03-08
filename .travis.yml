@@ -36,6 +36,7 @@ before_script:
 script:
   # Basic role syntax check
   - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
+  - ansible all -m setup -i tests/inventory
   - molecule test
   # - molecule test --destroy=never
   # - molecule test --scenario-name second-change
