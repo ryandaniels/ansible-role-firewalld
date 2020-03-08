@@ -1,7 +1,6 @@
 ---
-- name: Converge
-  hosts: all
-  become: true
+- hosts: localhost
+  remote_user: root
 
   vars:
     debug_enabled_default: false
@@ -64,14 +63,5 @@
         zone: public
         state: enabled
 
-  tasks:
-    # - name: cmd
-    #   command: env
-    #   register: cmd
-    # - debug: var=cmd
-    - name: "Include firewalld-home"
-      include_role:
-        name: "firewalld-home"
-
-  # roles:
-  #   - role: ryandaniels.firewalld
+  roles:
+    - ansible-role-firewalld

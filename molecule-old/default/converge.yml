@@ -11,7 +11,6 @@
     firewalld_packages:
       - firewalld
 
-    # firewalld_internal_remove_default: []
     firewalld_internal_remove_default:
       - mdns
       - samba-client
@@ -64,14 +63,6 @@
         zone: public
         state: enabled
 
-  tasks:
-    # - name: cmd
-    #   command: env
-    #   register: cmd
-    # - debug: var=cmd
-    - name: "Include firewalld-home"
-      include_role:
-        name: "firewalld-home"
 
-  # roles:
-  #   - role: ryandaniels.firewalld
+  roles:
+    - role: ryandaniels.firewalld
