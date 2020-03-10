@@ -2,7 +2,7 @@
 galaxy_info:
   role_name: firewalld
   author: Ryan Daniels
-  description: Role to manage firewalld configuration using simple variables
+  description: Role to manage firewalld configuration using simple variables. All changes made in "offline" mode to prevent blocking existing services.
   license: MIT
   min_ansible_version: 2.3
   platforms:
@@ -11,7 +11,8 @@ galaxy_info:
         - 7
     - name: Fedora
       versions:
-        - all
+        - 30
+        - 31
     - name: ArchLinux
       versions:
         - all
