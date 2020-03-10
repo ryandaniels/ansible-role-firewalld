@@ -18,7 +18,7 @@ firewalld manual: <https://firewalld.org/documentation/>
 
 ## Distros tested
 
-* CentOS: 7.6, 7.7
+* CentOS: 7.6, 7.7, 8.1
 * Fedora 30, 31
 * Arch Linux (firewalld version 0.8.1) - But who would run a bunch of Arch servers..
 
@@ -26,8 +26,9 @@ firewalld manual: <https://firewalld.org/documentation/>
 
 * firewalld
 
-Tested with version 0.6.3 (Latest available in CentOS)  
+Tested with version 0.6.3 (Latest available in CentOS 7)  
 Tested with version 0.6.6 (Latest available in Fedora 30)  
+Tested with version 0.7.0 (Latest available in CentOS 8)  
 Tested with version 0.7.3 (Latest available in Fedora 31)  
 Tested with version 0.8.1 (Latest available in Arch Linux)  
 
