@@ -9,7 +9,7 @@ stages:
 before_script:
   - export ROLE_NAME=firewalld
   - docker -v
-  - python -V
+  - python3 -V || echo "no python"
   - ansible --version
   - molecule --version
     # Use actual Ansible Galaxy role name for the project directory.
