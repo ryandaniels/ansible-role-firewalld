@@ -13,14 +13,14 @@ before_script:
   - export ROLE_NAME=firewalld
 
 molecule:
-stage: test
-script:
-  - python3 -m pip install ansible molecule docker ansible-lint
-  - ansible --version
-  - molecule --version
-  - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
-  - cd ryandaniels.$ROLE_NAME
-  - molecule test
+  stage: test
+  script:
+    - python3 -m pip install ansible molecule docker ansible-lint
+    - ansible --version
+    - molecule --version
+    - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
+    - cd ryandaniels.$ROLE_NAME
+    - molecule test
 
 # image: quay.io/ansible/molecule:3.0.2
 # services:
