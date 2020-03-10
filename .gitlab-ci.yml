@@ -39,6 +39,17 @@ molecule-centos7:
 #     changes:
 #       - roles/common/**/*
 
+molecule-centos8:
+  stage: tests
+  extends: .molecule_test
+  script:
+    - export MOLECULE_DISTRO="centos:8"
+    - molecule test --destroy=never && molecule test --scenario-name second-change
+    - molecule destroy
+#   only:
+#     changes:
+#       - roles/common/**/*
+
 molecule-fedora31:
   stage: tests
   extends: .molecule_test
