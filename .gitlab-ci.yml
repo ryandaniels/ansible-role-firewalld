@@ -1,4 +1,5 @@
 ---
+#much slower but works
 # image: docker:git
 # services:
 #   - docker:dind
@@ -46,6 +47,13 @@ services:
 stages:
   - tests
 
+variables:
+  DOCKER_HOST: "tcp://docker:2375"
+  PY_COLORS: 1
+
+tags:
+  - docker
+
 before_script:
   - export ROLE_NAME=firewalld
   # - apk update && apk add --no-cache py3-pip
@@ -64,11 +72,6 @@ before_script:
 
 molecule-centos7:
   stage: tests
-  tags:
-    - docker
-  variables:
-    DOCKER_HOST: "tcp://docker:2375"
-    PY_COLORS: 1
   script:
     - export MOLECULE_DISTRO="centos:7"
     - molecule test --destroy=never && molecule test --scenario-name second-change
@@ -79,11 +82,6 @@ molecule-centos7:
 
 molecule-fedora31:
   stage: tests
-  tags:
-    - docker
-  variables:
-    DOCKER_HOST: "tcp://docker:2375"
-    PY_COLORS: 1
   script:
     - export MOLECULE_DISTRO="fedora:31"
     - molecule test --destroy=never && molecule test --scenario-name second-change
