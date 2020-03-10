@@ -25,7 +25,7 @@
 #     - cd ryandaniels.$ROLE_NAME
 #     - molecule test
 
-image: quay.io/ansible/molecule:3.0.1
+image: quay.io/ansible/molecule:3.0.2
 services:
   - docker:dind
 
@@ -53,7 +53,7 @@ molecule-role-firewalld:
     DOCKER_HOST: "tcp://docker:2375"
     PY_COLORS: 1
   script:
-    # - python3 -m pip install ansible-lint
+    - python3 -m pip install ansible-lint
     - ansible-lint --version
     # - cd roles/firewalld/
     - molecule test
