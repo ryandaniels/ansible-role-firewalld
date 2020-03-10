@@ -18,6 +18,9 @@ molecule:
     - python3 -m pip install ansible molecule docker ansible-lint
     - ansible --version
     - molecule --version
+    - ansible-lint --version
+    - ls -l
+    - cd ../
     - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
     - cd ryandaniels.$ROLE_NAME
     - molecule test
