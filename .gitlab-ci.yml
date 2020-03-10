@@ -25,7 +25,7 @@
 #     - cd ryandaniels.$ROLE_NAME
 #     - molecule test
 
-image: quay.io/ansible/molecule:3.0.2
+image: quay.io/ansible/molecule:3.0.1
 services:
   - docker:dind
 
