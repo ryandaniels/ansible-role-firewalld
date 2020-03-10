@@ -16,6 +16,7 @@ before_script:
   - cd ../
   - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
   - cd ryandaniels.$ROLE_NAME
+  - ls -l
 
 molecule-role-firewalld:
   stage: tests
@@ -25,7 +26,7 @@ molecule-role-firewalld:
     DOCKER_HOST: "tcp://docker:2375"
     PY_COLORS: 1
   script:
-    - cd roles/firewalld/
+    # - cd roles/firewalld/
     - molecule test
 #   only:
 #     changes:
