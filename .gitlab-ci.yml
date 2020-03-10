@@ -12,6 +12,7 @@ before_script:
   - python3 -V || echo "no python"
   - ansible --version
   - molecule --version
+  - pip install ansible-lint
     # Use actual Ansible Galaxy role name for the project directory.
   - cd ../
   - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
