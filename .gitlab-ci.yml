@@ -1,62 +1,62 @@
 ---
-image: docker:git
-services:
-  - docker:dind
-
-before_script:
-  - apk update && apk add --no-cache docker
-    python3-dev py3-pip docker gcc git curl build-base
-    autoconf automake py3-cryptography linux-headers
-    musl-dev libffi-dev openssl-dev openssh
-  - docker info
-  - python3 --version
-  - export ROLE_NAME=firewalld
-
-molecule:
-  stage: test
-  script:
-    - python3 -m pip install ansible molecule docker ansible-lint
-    - ansible --version
-    - molecule --version
-    - ansible-lint --version
-    - ls -l
-    - cd ../
-    - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
-    - cd ryandaniels.$ROLE_NAME
-    - molecule test
-
-# image: quay.io/ansible/molecule:3.0.2
+# image: docker:git
 # services:
 #   - docker:dind
 
-# stages:
-#   - tests
-
 # before_script:
+#   - apk update && apk add --no-cache docker
+#     python3-dev py3-pip docker gcc git curl build-base
+#     autoconf automake py3-cryptography linux-headers
+#     musl-dev libffi-dev openssl-dev openssh
+#   - docker info
+#   - python3 --version
 #   - export ROLE_NAME=firewalld
-#   - docker -v
-#   - python3 -V || echo "no python"
-#   - ansible --version
-#   - molecule --version
-#   - apk update && apk add --no-cache py3-pip
-#     # Use actual Ansible Galaxy role name for the project directory.
-#   - cd ../
-#   - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
-#   - cd ryandaniels.$ROLE_NAME
-#   - ls -l
 
-# molecule-role-firewalld:
-#   stage: tests
-#   tags:
-#     - docker
-#   variables:
-#     DOCKER_HOST: "tcp://docker:2375"
-#     PY_COLORS: 1
+# molecule:
+#   stage: test
 #   script:
-#     - python3 -m pip install ansible-lint
+#     - python3 -m pip install ansible molecule docker ansible-lint
+#     - ansible --version
+#     - molecule --version
 #     - ansible-lint --version
-#     # - cd roles/firewalld/
+#     - ls -l
+#     - cd ../
+#     - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
+#     - cd ryandaniels.$ROLE_NAME
 #     - molecule test
-# #   only:
-# #     changes:
-# #       - roles/common/**/*
+
+image: quay.io/ansible/molecule:3.0.2
+services:
+  - docker:dind
+
+stages:
+  - tests
+
+before_script:
+  - export ROLE_NAME=firewalld
+  - docker -v
+  - python3 -V || echo "no python"
+  - ansible --version
+  - molecule --version
+  # - apk update && apk add --no-cache py3-pip
+    # Use actual Ansible Galaxy role name for the project directory.
+  - cd ../
+  - mv ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
+  - cd ryandaniels.$ROLE_NAME
+  - ls -l
+
+molecule-role-firewalld:
+  stage: tests
+  tags:
+    - docker
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    PY_COLORS: 1
+  script:
+    # - python3 -m pip install ansible-lint
+    - ansible-lint --version
+    # - cd roles/firewalld/
+    - molecule test
+#   only:
+#     changes:
+#       - roles/common/**/*
