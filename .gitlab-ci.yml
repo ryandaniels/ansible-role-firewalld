@@ -27,6 +27,15 @@ stages:
     # - cd ryandaniels.$ROLE_NAME
     - ln -s ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
     - cd ryandaniels.$ROLE_NAME
+  only:
+    refs:
+      - branches
+      - tags
+      - merge_requests
+  except:
+    changes:
+      - "**/*.{md,rst,gitignore}"
+      - "meta/*"
 
 molecule-centos7:
   stage: tests
@@ -35,9 +44,6 @@ molecule-centos7:
     - export MOLECULE_DISTRO="centos:7"
     - molecule test --destroy=never && molecule test --scenario-name second-change
     - molecule destroy
-#   only:
-#     changes:
-#       - roles/common/**/*
 
 molecule-centos8:
   stage: tests
@@ -46,9 +52,6 @@ molecule-centos8:
     - export MOLECULE_DISTRO="centos:8"
     - molecule test --destroy=never && molecule test --scenario-name second-change
     - molecule destroy
-#   only:
-#     changes:
-#       - roles/common/**/*
 
 molecule-fedora31:
   stage: tests
@@ -57,9 +60,6 @@ molecule-fedora31:
     - export MOLECULE_DISTRO="fedora:31"
     - molecule test --destroy=never && molecule test --scenario-name second-change
     - molecule destroy
-#   only:
-#     changes:
-#       - roles/common/**/*
 
 #much slower but works
 # image: docker:git
