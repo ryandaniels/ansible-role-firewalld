@@ -5,6 +5,7 @@ proxy_env: []
 firewalld_reload_hint_result: false
 
 firewalld_managed: false
+firewalld_show_config: false
 firewalld_start: false
 firewalld_managed_pkg: true
 firewalld_packages:

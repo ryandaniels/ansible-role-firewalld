@@ -52,6 +52,12 @@ proxy_env: []
 firewalld_managed: false
 ```
 
+* Show configuration from variables
+
+```yaml
+firewalld_show_config: false
+```
+
 * Start firewalld service
 
 ```yaml
@@ -194,7 +200,7 @@ ansible-playbook firewalld.yml --extra-vars "inventory=centos7 firewalld_managed
 Skip installing packages (if known already there - speeds up task)
 
 ```bash
-ansible-playbook firewalld.yml --extra-vars "inventory=all-dev firewalld_managed=true" -i hosts --skip-tags=firewalld_pkg_install
+ansible-playbook firewalld.yml --extra-vars "inventory=centos7 firewalld_managed=true" -i hosts --skip-tags=firewalld_pkg_install
 ```
 
 Show more verbose output (debug info)
@@ -207,6 +213,12 @@ Start firewalld service at end of role
 
 ```bash
 ansible-playbook firewalld.yml --extra-vars "inventory=centos7 firewalld_managed=true firewalld_start=true" -i hosts-dev
+```
+
+Only show configuration (from variables)
+
+```bash
+ansible-playbook firewalld.yml --extra-vars "inventory=centos7 firewalld_managed=true firewalld_show_config=true" -i hosts --tags "firewalld_show_config"
 ```
 
 ## firewalld Command Reference
