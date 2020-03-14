@@ -15,6 +15,26 @@
 #   tags:
 #     - firewalld
 
+- block:
+  # - name: debug groups
+  #   debug: var=groups
+  - name: debug firewalld_zone_source
+    debug: var=firewalld_zone_source
+  - name: debug firewalld_custom_service
+    debug: var=firewalld_custom_service
+  # - name: pause
+  #   pause:
+  #     seconds: 30
+  when:
+    # - ansible_os_family == "RedHat"
+    # - ansible_distribution_major_version == '7'
+    - firewalld_managed|bool
+    # - debug_enabled_default|bool
+    - firewalld_show_config|bool
+  tags:
+    - firewalld
+    - firewalld_show_config
+
 - name: Ensure required packages are installed (yum)
   package:
     name: "{{ firewalld_packages|default([]) }}"
@@ -357,12 +377,12 @@
     - firewalld
     - firewalld_create_service
 
-- name: pause
-  pause:
-    seconds: 30
-  when: debug_enabled_default|bool and firewalld_managed|bool
-  tags:
-    - firewalld
+# - name: pause
+#   pause:
+#     seconds: 30
+#   when: debug_enabled_default|bool and firewalld_managed|bool
+#   tags:
+#     - firewalld
 
 #firewall-offline-cmd --service=app123-internal --query-port=2181/tcp
 - name: firewalld | Get custom service ports to add
@@ -387,15 +407,15 @@
   tags:
     - firewalld
 
-- name: firewalld | debug stat_firewalld_service_get_service_port_add
-  debug: var=stat_firewalld_service_get_service_port_add
-  when:
-#    - ansible_os_family == "RedHat"
-#    - ansible_distribution_major_version == '7'
-    - firewalld_managed|bool
-    - debug_enabled_default|bool
-  tags:
-    - firewalld
+# - name: firewalld | debug stat_firewalld_service_get_service_port_add
+#   debug: var=stat_firewalld_service_get_service_port_add
+#   when:
+# #    - ansible_os_family == "RedHat"
+# #    - ansible_distribution_major_version == '7'
+#     - firewalld_managed|bool
+#     - debug_enabled_default|bool
+#   tags:
+#     - firewalld
 
 - name: firewalld | debug stat_firewalld_service_get_service_port_add_add.results|last
   debug: msg="{{ item.item | last }}" #, item.rc={{ item.rc }}, item.item_debug={{ item.item|type_debug }}"

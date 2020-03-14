@@ -1,10 +1,16 @@
 ---
 image: quay.io/ansible/molecule:3.0.2
 services:
-  - docker:dind
+  - name: docker:dind
+    entrypoint: ["dockerd-entrypoint.sh"]
 
 stages:
   - tests
+
+variables:
+  GIT_STRATEGY: clone
+  # DOCKER_HOST: "tcp://localhost:2375"
+  DOCKER_TLS_CERTDIR: ""
 
 .molecule_test:
   variables:
@@ -27,39 +33,37 @@ stages:
     # - cd ryandaniels.$ROLE_NAME
     - ln -s ansible-role-$ROLE_NAME ryandaniels.$ROLE_NAME
     - cd ryandaniels.$ROLE_NAME
-  only:
-    refs:
-      - branches
-      - tags
-      - merge_requests
-  except:
-    changes:
-      - "**/*.{md,rst,gitignore}"
-      - "meta/*"
+  script:
+    - molecule test --destroy=never && molecule test --scenario-name second-change
+    # - molecule destroy
+    # - sleep 3600
+  # only:
+  #   refs:
+  #     - branches
+  #     - tags
+  #     - merge_requests
+  # except:
+  #   changes:
+  #     - "**/*.{md,rst,gitignore}"
+  #     - "meta/*"
 
 molecule-centos7:
   stage: tests
   extends: .molecule_test
-  script:
-    - export MOLECULE_DISTRO="centos:7"
-    - molecule test --destroy=never && molecule test --scenario-name second-change
-    - molecule destroy
+  variables:
+    MOLECULE_DISTRO: "centos:7"
 
 molecule-centos8:
   stage: tests
   extends: .molecule_test
-  script:
-    - export MOLECULE_DISTRO="centos:8"
-    - molecule test --destroy=never && molecule test --scenario-name second-change
-    - molecule destroy
+  variables:
+    MOLECULE_DISTRO: "centos:8"
 
 molecule-fedora31:
   stage: tests
   extends: .molecule_test
-  script:
-    - export MOLECULE_DISTRO="fedora:31"
-    - molecule test --destroy=never && molecule test --scenario-name second-change
-    - molecule destroy
+  variables:
+    MOLECULE_DISTRO: "fedora:31"
 
 #much slower but works
 # image: docker:git
