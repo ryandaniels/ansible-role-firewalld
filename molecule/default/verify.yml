@@ -59,7 +59,7 @@
     changed_when: false
     failed_when: not cmd.rc == 1
 
-  - name: Check port added to custom service
+  - name: Check tcp port added to custom service
     command: firewall-cmd --permanent --service=app123-public --query-port=5000/tcp
     register: cmd
     # ignore_errors: true
@@ -68,6 +68,13 @@
 
   # - name: debug Check port added to custom service cmd
   #   debug: var=cmd
+
+  - name: Check udp port added to custom service
+    command: firewall-cmd --permanent --service=app123-internal --query-port=8500/udp
+    register: cmd
+    # ignore_errors: true
+    changed_when: false
+    # failed_when: not cmd.rc == 0
 
   - name: Check custom port added to built-in service
     command: firewall-cmd --permanent --service=zabbix-agent --query-port=3333/tcp

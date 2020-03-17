@@ -42,7 +42,7 @@
   #   changed_when: false
   #   failed_when: not cmd.rc == 1
 
-  - name: Check port added to custom service
+  - name: Check tcp port added to custom service
     command: firewall-cmd --permanent --service=app123-internal --query-port=8089/tcp
     register: cmd
     # ignore_errors: true
@@ -55,3 +55,10 @@
     # ignore_errors: true
     changed_when: false
     failed_when: not cmd.rc == 1
+
+  - name: Check udp port added to custom service
+    command: firewall-cmd --permanent --service=app123-internal --query-port=8501/udp
+    register: cmd
+    # ignore_errors: true
+    changed_when: false
+    # failed_when: not cmd.rc == 0

@@ -59,6 +59,7 @@
         description: app123 firewall rules for internal zone
         port_protocol:
           - 8080/tcp
+          - 8500/udp
           - 9000/tcp
       - name: zabbix-agent
         zone: public
@@ -71,14 +72,6 @@
         state: enabled
 
   tasks:
-    # - name: cmd
-    #   command: env
-    #   register: cmd
-    # - debug: var=cmd
     - name: "Include firewalld"
       include_role:
-        # name: "firewalld-home"
         name: "ryandaniels.firewalld"
-
-  # roles:
-  #   - role: ryandaniels.firewalld
