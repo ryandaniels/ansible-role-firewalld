@@ -58,6 +58,19 @@ proxy_env: []
 firewalld_managed: false
 ```
 
+* Check if (Docker) service is running or enabled, and fail the role
+
+```yaml
+firewalld_check_problem_service_managed: true
+```
+
+* Services to check, and fail the role
+
+```yaml
+firewalld_check_problem_service:
+  - docker.service
+```
+
 * Show configuration from variables
 
 ```yaml
@@ -315,3 +328,7 @@ nft list chain inet firewalld filter_IN_public_allow
 * [x] Build travis tests for many scenarios
 * [ ] Improve/shorten changing/removing a port
 * [ ] --diff doesn't show much since using many commands. Show what's going to happen and add pause when is debug enabled?
+
+## Author
+
+Ryan Daniels
