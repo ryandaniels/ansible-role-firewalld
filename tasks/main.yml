@@ -18,13 +18,13 @@
 - block:
   # - name: debug groups
   #   debug: var=groups
-  - name: debug firewalld_zone_source
+  - name: firewalld | Show firewalld_zone_source
     debug: var=firewalld_zone_source
-  - name: debug firewalld_custom_service
+  - name: firewalld | Show firewalld_custom_service
     debug: var=firewalld_custom_service
-  # - name: pause
-  #   pause:
-  #     seconds: 30
+  - name: pause
+    pause:
+      seconds: 5
   when:
     # - ansible_os_family == "RedHat"
     # - ansible_distribution_major_version == '7'
@@ -34,6 +34,45 @@
   tags:
     - firewalld
     - firewalld_show_config
+
+- name: firewalld | Check for problem services
+  command: systemctl show -p UnitFileState -p SubState {{ item }} warn=false
+  register: stat_service_bad
+  # failed_when: ("SubState=running" in stat_service_bad.stdout) or ("UnitFileState=enabled" in stat_service_bad.stdout)
+  # ignore_errors: true
+  changed_when: false
+  # no_log: true
+# - debug: var=stat_service_bad.stdout_lines
+  with_items:
+    - "{{ firewalld_check_problem_service }}"
+  when:
+    - firewalld_managed|bool
+    - firewalld_check_problem_service_managed|bool
+  tags:
+    - firewalld
+    - firewalld_check_service
+
+# - debug: var=stat_service_bad.results
+#   when:
+#     - firewalld_managed|bool
+#     - firewalld_check_problem_service_managed|bool
+#   tags:
+#     - firewalld
+#     - firewalld_check_service
+
+- name: firewalld | Fail if specified problem service is running
+  fail:
+    msg: "{{ item.item }} service is running or enabled, and firewalld can cause a problem with that service"
+  with_items: "{{ stat_service_bad.results }}"
+  when:
+    - firewalld_managed|bool
+    - firewalld_check_problem_service_managed|bool
+    - ("SubState=running" in item.stdout_lines) or ("UnitFileState=enabled" in item.stdout_lines)
+  # loop_control:
+  #   label: "Service {{ item }} is running or enabled. It can have a problem with firewalld"
+  tags:
+    - firewalld
+    - firewalld_check_service
 
 - name: Ensure required packages are installed (yum)
   package:

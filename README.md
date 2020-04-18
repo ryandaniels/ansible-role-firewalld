@@ -16,6 +16,12 @@ Be careful, this will remove and add firewalld rules on the OS. Use with caution
 
 firewalld manual: <https://firewalld.org/documentation/>
 
+**Note**: Docker and firewalld do not get along. This role has a check enabled to fail this role if the docker service is running or enabled.  
+For more information about firewalld and Docker:  
+<https://success.docker.com/article/why-am-i-having-network-problems-after-firewalld-is-restarted>  
+<https://www.tripwire.com/state-of-security/devops/psa-beware-exposing-ports-docker/>  
+<https://docs.docker.com/network/iptables/>  
+
 ## Distros tested
 
 * CentOS: 7.6, 7.7, 8.1
