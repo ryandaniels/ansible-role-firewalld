@@ -7,6 +7,7 @@
     debug_enabled_default: false
     firewalld_managed: true
     firewalld_show_config: false
+    firewalld_check_problem_service_managed: true
     firewalld_start: true
     firewalld_managed_pkg: true
     firewalld_packages:

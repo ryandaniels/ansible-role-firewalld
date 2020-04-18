@@ -16,6 +16,12 @@ Be careful, this will remove and add firewalld rules on the OS. Use with caution
 
 firewalld manual: <https://firewalld.org/documentation/>
 
+**Note**: Docker and firewalld do not get along. This role has a check enabled to fail this role if the docker service is running or enabled.  
+For more information about firewalld and Docker:  
+<https://success.docker.com/article/why-am-i-having-network-problems-after-firewalld-is-restarted>  
+<https://www.tripwire.com/state-of-security/devops/psa-beware-exposing-ports-docker/>  
+<https://docs.docker.com/network/iptables/>  
+
 ## Distros tested
 
 * CentOS: 7.6, 7.7, 8.1
@@ -50,6 +56,19 @@ proxy_env: []
 
 ```yaml
 firewalld_managed: false
+```
+
+* Check if (Docker) service is running or enabled, and fail the role
+
+```yaml
+firewalld_check_problem_service_managed: true
+```
+
+* Services to check, and fail the role
+
+```yaml
+firewalld_check_problem_service:
+  - docker.service
 ```
 
 * Show configuration from variables
@@ -309,3 +328,7 @@ nft list chain inet firewalld filter_IN_public_allow
 * [x] Build travis tests for many scenarios
 * [ ] Improve/shorten changing/removing a port
 * [ ] --diff doesn't show much since using many commands. Show what's going to happen and add pause when is debug enabled?
+
+## Author
+
+Ryan Daniels

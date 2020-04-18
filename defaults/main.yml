@@ -5,7 +5,10 @@ proxy_env: []
 firewalld_reload_hint_result: false
 
 firewalld_managed: false
-firewalld_show_config: false
+firewalld_show_config: true
+firewalld_check_problem_service_managed: true
+firewalld_check_problem_service:
+  - docker.service
 firewalld_start: false
 firewalld_managed_pkg: true
 firewalld_packages:
