@@ -21,7 +21,7 @@ env:
     # Fedora 29 has problem with ip6tables kernel module
     # - MOLECULE_DISTRO: fedora:29
     # - MOLECULE_DISTRO: fedora:30
-    - MOLECULE_DISTRO: fedora:31
+    - MOLECULE_DISTRO: fedora:32
     # - MOLECULE_DISTRO: archlinux
 
 install:

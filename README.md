@@ -25,7 +25,7 @@ For more information about firewalld and Docker:
 ## Distros tested
 
 * CentOS: 7.6, 7.7, 8.1
-* Fedora 30, 31
+* Fedora 30, 31, 32
 * Arch Linux (firewalld version 0.8.1) - But who would run a bunch of Arch servers..
 
 ## Dependencies

@@ -59,11 +59,11 @@ molecule-centos8:
   variables:
     MOLECULE_DISTRO: "centos:8"
 
-molecule-fedora31:
+molecule-fedora32:
   stage: tests
   extends: .molecule_test
   variables:
-    MOLECULE_DISTRO: "fedora:31"
+    MOLECULE_DISTRO: "fedora:32"
 
 #much slower but works
 # image: docker:git
