@@ -1,5 +1,5 @@
 ---
-image: quay.io/ansible/molecule:3.0.2
+image: quay.io/ansible/molecule:3.0.4
 services:
   - name: docker:dind
     entrypoint: ["dockerd-entrypoint.sh"]
