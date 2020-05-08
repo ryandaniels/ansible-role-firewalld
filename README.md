@@ -37,6 +37,7 @@ Tested with version 0.6.6 (Latest available in Fedora 30)
 Tested with version 0.7.0 (Latest available in CentOS 8)  
 Tested with version 0.7.3 (Latest available in Fedora 31)  
 Tested with version 0.8.1 (Latest available in Arch Linux)  
+Tested with version 0.8.2 (Latest available in Fedora 32)  
 
 ## Default Settings
 
