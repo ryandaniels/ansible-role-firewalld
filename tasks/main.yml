@@ -74,11 +74,11 @@
     - firewalld
     - firewalld_check_service
 
-- name: Ensure required packages are installed (yum)
+- name: Ensure required packages are installed
   package:
     name: "{{ firewalld_packages|default([]) }}"
     update_cache: yes
-    state: installed
+    state: present
   environment: "{{ proxy_env }}"
   when:
     # - ansible_os_family == "RedHat"

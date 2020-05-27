@@ -1,4 +1,4 @@
-# ansible-role-firewalld
+# Ansible Role: firewalld
 
 Add local firewall rules on server via firewalld.  
 Why another Ansible role to manage firewalld? The role does everything in "offline" mode. Even creating a new service works offline.  
@@ -21,6 +21,10 @@ For more information about firewalld and Docker:
 <https://success.docker.com/article/why-am-i-having-network-problems-after-firewalld-is-restarted>  
 <https://www.tripwire.com/state-of-security/devops/psa-beware-exposing-ports-docker/>  
 <https://docs.docker.com/network/iptables/>  
+
+## Testing
+
+Molecule is used for testing, and all features are tested. Changes are then made a second time and re-tested to be sure everything works.  
 
 ## Distros tested
 
